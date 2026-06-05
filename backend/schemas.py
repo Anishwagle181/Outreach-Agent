@@ -22,6 +22,18 @@ class UserOut(BaseModel):
     email: str
     company_name: str
     calendly: str
+    business_description: str = ""
+    offer: str = ""
+    target_customer: str = ""
+    outreach_style: str = ""
+    personalization_style: str = ""
+    personalization_examples: str = ""
+    objection_style: str = ""
+    step1_script: str = ""
+    step2_script: str = ""
+    step3_script: str = ""
+    step4_script: str = ""
+    onboarding_complete: int = 0
 
     class Config:
         from_attributes = True
@@ -32,6 +44,18 @@ class UserOut(BaseModel):
 class SettingsUpdate(BaseModel):
     company_name: Optional[str] = None
     calendly: Optional[str] = None
+    business_description: Optional[str] = None
+    offer: Optional[str] = None
+    target_customer: Optional[str] = None
+    outreach_style: Optional[str] = None
+    personalization_style: Optional[str] = None
+    personalization_examples: Optional[str] = None
+    objection_style: Optional[str] = None
+    step1_script: Optional[str] = None
+    step2_script: Optional[str] = None
+    step3_script: Optional[str] = None
+    step4_script: Optional[str] = None
+    onboarding_complete: Optional[int] = None
 
 
 # ── Messages ──────────────────────────────────────────────────────────────────

@@ -19,10 +19,13 @@ def update_settings(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    if data.company_name is not None:
-        current_user.company_name = data.company_name
-    if data.calendly is not None:
-        current_user.calendly = data.calendly
+    for field, value in data.model_dump(exclude_none=True).items():
+        setattr(current_user, field, value)
+
+    # If they saved business context, treat onboarding as complete.
+    if any(getattr(current_user, f, "") for f in ["business_description", "offer", "target_customer"]):
+        current_user.onboarding_complete = 1
+
     db.commit()
     db.refresh(current_user)
     return current_user
