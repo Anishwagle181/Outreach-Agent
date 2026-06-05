@@ -510,16 +510,15 @@ OUTPUT FORMAT
 =============
 
 Return JSON only:
-
-{
-"whatTheyMean": "What they are really saying beneath the surface in 1-2 sentences.",
-"conversationState": "Dead | Weak | Curious | Qualified | Closing",
-"whyThisState": "Why this is the correct state.",
-"score": 1-10,
-"intent": "bad_fit | soft_objection | curious | interested | ready_to_book | partnership",
-"nextAction": "end_conversation | continue_conversation | qualify | close",
-"reply": "Actual LinkedIn reply only"
-}
+{{
+  "whatTheyMean": "What they are really saying beneath the surface in 1-2 sentences.",
+  "conversationState": "Dead | Weak | Curious | Qualified | Closing",
+  "whyThisState": "Why this is the correct state.",
+  "score": 1,
+  "intent": "bad_fit | soft_objection | curious | interested | ready_to_book | partnership",
+  "nextAction": "end_conversation | continue_conversation | qualify | close",
+  "reply": "Actual LinkedIn reply only"
+}}
 
 Calendar link (ONLY when ready_to_book):
 
