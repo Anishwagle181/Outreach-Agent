@@ -1,0 +1,68 @@
+version: '3.9'
+
+services:
+  backend:
+    image: ghcr.io/anishwagle181/outreach-agent/backend:main
+    container_name: outreach-agent-backend-prod
+    ports:
+      - "8000:8000"
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///./outreach.db}
+      - SECRET_KEY=${SECRET_KEY}
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+    volumes:
+      - ./data/outreach.db:/app/outreach.db
+      - ./logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - outreach-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    image: ghcr.io/anishwagle181/outreach-agent/frontend:main
+    container_name: outreach-agent-frontend-prod
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - outreach-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Optional: Nginx reverse proxy for production
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: outreach-agent-nginx
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./certs:/etc/nginx/certs:ro
+  #   depends_on:
+  #     - backend
+  #     - frontend
+  #   networks:
+  #     - outreach-network
+  #   restart: unless-stopped
+
+networks:
+  outreach-network:
+    name: outreach-network
+    driver: bridge
+
+volumes:
+  db_data:

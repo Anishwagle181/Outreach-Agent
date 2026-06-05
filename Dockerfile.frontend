@@ -1,0 +1,19 @@
+# Frontend Dockerfile - Static HTTP Server
+FROM python:3.11-slim
+
+WORKDIR /app/frontend
+
+# Copy frontend files
+COPY frontend/ .
+
+ENV PYTHONUNBUFFERED=1
+ENV PORT=3000
+
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:3000/')" || exit 1
+
+# Start HTTP server
+CMD ["python", "-m", "http.server", "3000"]

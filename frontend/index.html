@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Outreach Agent — Nexa Lead</title>
+<style>
+:root{
+  --bg:#0d0d10;--s1:#131318;--s2:#18181f;--s3:#20202a;--b1:rgba(255,255,255,.08);--b2:rgba(255,255,255,.14);
+  --t1:#f2f2f5;--t2:#aaaabb;--t3:#666678;--gold:#c9a84c;--gold2:#e8c97a;--green:#3ecf8e;--red:#f26b6b;--blue:#6aa0ff;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;--serif:Georgia,serif;
+}
+*{box-sizing:border-box}
+body{margin:0;height:100vh;background:var(--bg);color:var(--t1);font-family:var(--mono);font-size:12px;overflow:hidden}
+.app{display:grid;grid-template-columns:240px 1fr;height:100vh}
+.sidebar{background:var(--s1);border-right:1px solid var(--b1);display:flex;flex-direction:column}
+.brand{padding:18px 16px;border-bottom:1px solid var(--b1)}
+.brand-name{font-family:var(--serif);font-style:italic;font-size:23px;color:var(--gold2);cursor:pointer}
+.brand-tag{font-size:9px;color:var(--t3);letter-spacing:.8px;text-transform:uppercase;margin-top:3px}
+.btn{border:0;border-radius:7px;padding:9px 12px;font-family:var(--mono);font-size:11px;cursor:pointer}
+.btn-gold{background:var(--gold);color:#111;font-weight:700}
+.btn-ghost{background:transparent;color:var(--t2);border:1px solid var(--b1)}
+.btn-green{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25)}
+.btn-red{background:rgba(242,107,107,.12);color:var(--red);border:1px solid rgba(242,107,107,.25)}
+.btn-sm{padding:6px 9px;font-size:10px}
+.sidebar-actions{padding:12px;display:grid;gap:8px}
+.section{padding:10px 16px 5px;font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1px}
+.people-list{flex:1;overflow:auto}
+.person{padding:10px 14px;border-left:2px solid transparent;display:flex;gap:10px;cursor:pointer}
+.person:hover{background:rgba(255,255,255,.03)}
+.person.active{background:rgba(201,168,76,.10);border-left-color:var(--gold)}
+.avatar{width:30px;height:30px;border-radius:50%;border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;font-family:var(--serif);color:var(--gold2);background:var(--s3);flex:none}
+.p-name{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-meta{font-size:9px;color:var(--t3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:12px;border-top:1px solid var(--b1)}
+.stat{background:var(--s2);border:1px solid var(--b1);border-radius:8px;text-align:center;padding:8px 4px}
+.stat strong{font-family:var(--serif);font-size:17px;color:var(--gold2);display:block}
+.stat span{font-size:8px;color:var(--t3);text-transform:uppercase}
+.main{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}
+.topbar{height:58px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:10px;padding:0 20px}
+.title{font-family:var(--serif);font-style:italic;font-size:22px;flex:1}
+.search{width:230px;background:var(--s2);border:1px solid var(--b1);border-radius:7px;color:var(--t1);padding:8px 10px;font-family:var(--mono);font-size:11px;outline:none}
+.page{display:none;flex:1;min-height:0;overflow:hidden}
+.page.active{display:flex}
+.welcome{align-items:center;justify-content:center;text-align:center;color:var(--t3);flex-direction:column;padding:40px}
+.welcome h1{font-family:var(--serif);font-style:italic;color:var(--gold2);font-weight:400;font-size:42px;margin:0 0 8px}
+.conv{flex-direction:column;min-height:0;width:100%;overflow:hidden}
+.conv-head{padding:15px 20px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:12px}
+.conv-name{font-family:var(--serif);font-style:italic;font-size:18px}
+.conv-role{font-size:10px;color:var(--t3);margin-top:2px}
+.steps{display:flex;gap:0;width:380px;margin-left:auto}
+.step{flex:1;text-align:center;border:1px solid var(--b1);padding:6px 3px;font-size:9px;color:var(--t3)}
+.step:first-child{border-radius:6px 0 0 6px}.step:last-child{border-radius:0 6px 6px 0}.step+.step{border-left:0}
+.step.done{color:var(--green);background:rgba(62,207,142,.08)}
+.step.now{color:var(--gold);background:rgba(201,168,76,.1)}
+.chat{flex:1;min-height:0;overflow-y:auto;padding:18px 20px 28px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
+.msg{max-width:78%;line-height:1.65}
+.msg.you{align-self:flex-end}.msg.them{align-self:flex-start}.msg.ai{align-self:stretch;max-width:100%}
+.bubble{border:1px solid var(--b1);border-radius:10px;padding:12px 14px;white-space:pre-wrap}
+.you .bubble{background:var(--s3);border-color:var(--b2)}.them .bubble{background:var(--s2);color:var(--t2)}
+.ai .bubble{background:rgba(201,168,76,.08);border-color:rgba(201,168,76,.22);max-height:260px;overflow-y:auto}
+.score-good{color:var(--green);border-color:rgba(62,207,142,.35);background:rgba(62,207,142,.09)}
+.score-mid{color:var(--gold);border-color:rgba(201,168,76,.35);background:rgba(201,168,76,.09)}
+.score-low{color:var(--red);border-color:rgba(242,107,107,.35);background:rgba(242,107,107,.09)}
+.meta{font-size:9px;color:var(--t3);margin:0 2px 4px}.you .meta{text-align:right}
+.compose{border-top:1px solid var(--b1);padding:12px 20px;background:var(--s1);flex-shrink:0}
+.row{display:flex;gap:8px;align-items:center}.row.wrap{flex-wrap:wrap}
+textarea,input,select{background:var(--s2);border:1px solid var(--b1);border-radius:7px;color:var(--t1);font-family:var(--mono);font-size:11px;padding:9px 10px;outline:none}
+textarea{resize:vertical;line-height:1.55}
+.reply{flex:1;min-height:90px;max-height:150px;font-size:12px;padding:12px 13px}
+.people-page{flex-direction:column;width:100%;overflow:auto;padding:20px}
+.table{width:100%;border-collapse:collapse}
+th,td{border-bottom:1px solid var(--b1);padding:11px;text-align:left;font-size:11px}
+th{color:var(--t3);text-transform:uppercase;font-size:9px;letter-spacing:.8px}
+tr:hover td{background:rgba(255,255,255,.02)}
+.pill{padding:3px 7px;border-radius:4px;border:1px solid var(--b1);font-size:9px;text-transform:uppercase;color:var(--t2)}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:5}
+.modal-bg.open{display:flex}
+.modal{background:var(--s1);border:1px solid var(--b2);border-radius:12px;width:560px;max-width:94vw;max-height:92vh;overflow:auto;padding:22px}
+.modal h2{font-family:var(--serif);font-style:italic;color:var(--gold2);font-weight:400;margin:0 0 16px;font-size:22px}
+.field{margin-bottom:12px}.field label{display:block;color:var(--t3);font-size:9px;letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px}
+.field input,.field textarea,.field select{width:100%}
+.auth-screen{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:10}
+.auth-screen.open{display:flex}
+.auth-card{width:420px;max-width:92vw;background:var(--s1);border:1px solid var(--b2);border-radius:16px;padding:28px;text-align:center}
+.auth-card h1{font-family:var(--serif);font-style:italic;color:var(--gold2);font-weight:400;margin:0 0 6px}
+.auth-tab-row{display:flex;gap:0;margin-bottom:20px;border:1px solid var(--b1);border-radius:7px;overflow:hidden}
+.auth-tab{flex:1;padding:8px;background:transparent;border:0;color:var(--t3);font-family:var(--mono);font-size:11px;cursor:pointer}
+.auth-tab.active{background:var(--s3);color:var(--t1)}
+.home-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:22px;max-width:780px;width:100%}
+.home-card{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:16px;text-align:left}
+.home-card strong{display:block;color:var(--t1);font-size:13px;margin-bottom:6px}
+.home-card span{color:var(--t3);font-size:10px;line-height:1.6}
+.home-actions{display:flex;gap:10px;margin-top:22px;justify-content:center}
+@media(max-width:900px){.home-grid{grid-template-columns:1fr}.steps{display:none}}
+.toast{position:fixed;right:18px;bottom:18px;background:var(--s2);border:1px solid var(--b2);border-radius:8px;padding:10px 14px;color:var(--t1);opacity:0;transform:translateY(8px);transition:.2s;z-index:20}
+.toast.show{opacity:1;transform:translateY(0)}
+.note{font-size:10px;color:var(--t3);line-height:1.5}
+.copy{color:var(--gold);text-decoration:underline;cursor:pointer}
+.err{color:var(--red);font-size:10px;margin-top:8px;min-height:16px}
+.spinner{display:inline-block;width:10px;height:10px;border:2px solid var(--b2);border-top-color:var(--gold);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:4px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- ── Auth Screen ───────────────────────────────────────────────────────── -->
+<div class="auth-screen" id="auth-screen">
+  <div class="auth-card">
+    <h1>Outreach Agent</h1>
+    <p class="note" style="margin-bottom:18px">Groq-powered LinkedIn CRM</p>
+    <div class="auth-tab-row">
+      <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Sign In</button>
+      <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Create Account</button>
+    </div>
+
+    <!-- Login form -->
+    <div id="login-form">
+      <div class="field"><label>Email</label><input id="auth-email" type="email" placeholder="you@company.com" autocomplete="email"/></div>
+      <div class="field"><label>Password</label><input id="auth-password" type="password" placeholder="••••••••" autocomplete="current-password"/></div>
+      <div class="err" id="auth-err"></div>
+      <button class="btn btn-gold" id="auth-submit-btn" onclick="doLogin()" style="width:100%;margin-top:4px">Sign In</button>
+    </div>
+
+    <!-- Register form -->
+    <div id="register-form" style="display:none">
+      <div class="field"><label>Company / Agency Name</label><input id="reg-company" placeholder="Your company name"/></div>
+      <div class="field"><label>Email</label><input id="reg-email" type="email" placeholder="you@company.com" autocomplete="email"/></div>
+      <div class="field"><label>Password</label><input id="reg-password" type="password" placeholder="Choose a password" autocomplete="new-password"/></div>
+      <div class="err" id="reg-err"></div>
+      <button class="btn btn-gold" id="reg-submit-btn" onclick="doRegister()" style="width:100%;margin-top:4px">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Main App ──────────────────────────────────────────────────────────── -->
+<div class="app" id="main-app" style="display:none">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-name" id="brand-name" onclick="showHome()">Outreach Agent</div>
+      <div class="brand-tag">Groq powered CRM</div>
+    </div>
+    <div class="sidebar-actions">
+      <button class="btn btn-gold" onclick="openNewPerson()">+ New Person</button>
+      <button class="btn btn-ghost" onclick="showPeople()">People View</button>
+      <button class="btn btn-ghost" onclick="openSettings()">⚙ Settings</button>
+    </div>
+    <div class="section">People</div>
+    <div class="people-list" id="people-list"></div>
+    <div class="stats">
+      <div class="stat"><strong id="stat-people">0</strong><span>People</span></div>
+      <div class="stat"><strong id="stat-replies">0</strong><span>Replies</span></div>
+      <div class="stat"><strong id="stat-booked">0</strong><span>Booked</span></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="title" id="top-title">Home</div>
+      <input class="search" id="global-search" placeholder="Search person name..." oninput="renderAll()"/>
+    </div>
+
+    <section class="page active welcome" id="page-welcome">
+      <h1 id="home-company">Outreach Agent</h1>
+      <p style="max-width:560px;line-height:1.8">Your LinkedIn outreach workspace. Add a person, generate the first personalized message, track every chat, and handle replies with Charlie-style objection handling.</p>
+      <div class="home-actions">
+        <button class="btn btn-gold" onclick="openNewPerson()">+ New Person</button>
+        <button class="btn btn-ghost" onclick="showPeople()">Open People View</button>
+      </div>
+      <div class="home-grid">
+        <div class="home-card"><strong>1. Add LinkedIn link</strong><span>Paste the profile URL and optional profile text. The agent detects name, role, service, and writes the first message.</span></div>
+        <div class="home-card"><strong>2. Continue each chat</strong><span>Click any person from the sidebar to see the full conversation and generate the next step.</span></div>
+        <div class="home-card"><strong>3. Handle replies</strong><span>Paste their reply in the bigger reply box and get analysis plus the best message to send next.</span></div>
+      </div>
+    </section>
+
+    <section class="page people-page" id="page-people">
+      <table class="table">
+        <thead><tr><th>Person</th><th>Score</th><th>Role</th><th>Service</th><th>Status</th><th>Step</th><th>Last Activity</th><th>Action</th></tr></thead>
+        <tbody id="people-table"></tbody>
+      </table>
+    </section>
+
+    <section class="page conv" id="page-conv">
+      <div class="conv-head">
+        <div class="avatar" id="c-avatar">?</div>
+        <div>
+          <div class="conv-name" id="c-name">—</div>
+          <div class="conv-role" id="c-role">—</div>
+        </div>
+        <div class="steps">
+          <div class="step" id="step-1">1 · Connect</div>
+          <div class="step" id="step-2">2 · Ask</div>
+          <div class="step" id="step-3">3 · Pitch</div>
+          <div class="step" id="step-4">4 · Book</div>
+        </div>
+      </div>
+      <div class="chat" id="chat"></div>
+      <div class="compose">
+        <div class="row wrap" style="margin-bottom:9px">
+          <button class="btn btn-gold btn-sm" onclick="generateCurrentStep()">Generate current step</button>
+          <button class="btn btn-ghost btn-sm" onclick="scrollChatBottom()">↓ Bottom</button>
+          <button class="btn btn-green btn-sm" onclick="markSent()">✓ Sent / advance</button>
+          <button class="btn btn-green btn-sm" onclick="markBooked()">Mark booked</button>
+          <button class="btn btn-ghost btn-sm" onclick="archivePerson()">Archive</button>
+          <button class="btn btn-red btn-sm" onclick="deleteCurrentPerson()">Delete</button>
+        </div>
+        <div class="row">
+          <textarea class="reply" id="their-reply" placeholder="Paste their reply here for Charlie-style objection handling..."></textarea>
+          <button class="btn btn-gold" id="handle-btn" onclick="handleObjection()" style="align-self:stretch;min-width:115px">Handle reply</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ── New Person Modal ──────────────────────────────────────────────────── -->
+<div class="modal-bg" id="new-modal">
+  <div class="modal">
+    <h2>New Person</h2>
+    <div class="field">
+      <label>LinkedIn Profile Link</label>
+      <input id="linkedin-url" placeholder="https://www.linkedin.com/in/name/"/>
+    </div>
+    <div class="field">
+      <label>Profile text backup (optional but recommended)</label>
+      <textarea id="profile-text" rows="7" placeholder="If LinkedIn link cannot be read, paste profile text here: headline, about, posts, experience."></textarea>
+      <div class="note">A normal browser HTML file usually cannot scrape LinkedIn directly because LinkedIn blocks cross-origin requests. The AI can infer from pasted text, and can use the URL slug as backup.</div>
+    </div>
+    <div class="row" style="justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeNewPerson()">Cancel</button>
+      <button class="btn btn-gold" id="create-btn" onclick="createFromLinkedIn()">Auto-detect + create</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Settings Modal ────────────────────────────────────────────────────── -->
+<div class="modal-bg" id="settings-modal">
+  <div class="modal">
+    <h2>Settings</h2>
+    <div class="field"><label>Company Name</label><input id="set-company"/></div>
+    <div class="field"><label>Calendly Link</label><input id="set-cal" placeholder="https://cal.com/..."/></div>
+    <p class="note">Your Groq API key is configured server-side and never exposed to the browser.</p>
+    <div class="row" style="justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-red" onclick="logout()">Log out</button>
+      <button class="btn btn-ghost" onclick="closeSettings()">Cancel</button>
+      <button class="btn btn-gold" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Feedback Modal ────────────────────────────────────────────────────── -->
+<div class="modal-bg" id="feedback-modal">
+  <div class="modal">
+    <h2>Refine Reply</h2>
+    <p class="note">Tell the AI what you don't like about the reply and what you want to change. Be specific!</p>
+    <div class="field">
+      <label>Your feedback</label>
+      <textarea id="feedback-text" rows="4" placeholder="E.g., 'Too long, make it more direct' or 'Add a specific question about their revenue model'"></textarea>
+    </div>
+    <div class="row" style="justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeFeedbackModal()">Cancel</button>
+      <button class="btn btn-gold" id="feedback-submit" onclick="submitFeedback()">Refine reply</button>
+    </div>
+    <p class="note" style="margin-top:12px">Tip: Use Ctrl+Enter to submit</p>
+  </div>
+</div>
+
+<!-- ── Edit Reply Modal ────────────────────────────────────────────────────── -->
+<div class="modal-bg" id="edit-modal">
+  <div class="modal">
+    <h2>Edit Reply</h2>
+    <p class="note">Modify the reply text as needed. Make it concise and natural.</p>
+    <div class="field">
+      <label>Reply text</label>
+      <textarea id="edit-reply-text" rows="6" placeholder="Paste your edited reply here"></textarea>
+    </div>
+    <div class="row" style="justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-gold" id="edit-submit" onclick="saveEditedReply()">Save changes</button>
+    </div>
+    <p class="note" style="margin-top:12px">Tip: Use Ctrl+Enter to save</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API_BASE = "http://127.0.0.1:8000/api";
+
+let token = localStorage.getItem("oa_token") || "";
+let people = [];
+let activeId = null;
+let settings = { companyName: "Outreach Agent", calendly: "https://cal.com/nexa-lead-qng40v/15min" };
+
+// ── API helper ────────────────────────────────────────────────────────────────
+async function api(method, path, body = null) {
+  const headers = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = "Bearer " + token;
+  const opts = { method, headers };
+  if (body !== null) opts.body = JSON.stringify(body);
+  const r = await fetch(API_BASE + path, opts);
+  if (r.status === 401) { logout(); throw new Error("Session expired. Please log in again."); }
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.detail || "API error");
+  return data;
+}
+
+// ── Normalise backend snake_case → frontend camelCase ─────────────────────────
+function normPerson(p) {
+  return {
+    id: p.id,
+    name: p.name,
+    role: p.role || "",
+    service: p.service || "",
+    linkedinUrl: p.linkedin_url || "",
+    profileText: p.profile_text || "",
+    personalization: p.personalization || "",
+    prospectScore: p.prospect_score || 5,
+    scoreReason: p.score_reason || "",
+    status: p.status || "active",
+    step: p.step || 1,
+    intent: p.intent || "",
+    nextAction: p.next_action || "",
+    created: p.created || "",
+    lastActivity: p.last_activity || "Today",
+    messages: (p.messages || []).map(m => ({
+      id: m.id,
+      from: m.from_role,
+      label: m.label || "",
+      text: m.text,
+      ts: m.ts,
+    })),
+  };
+}
+
+// ── Utility ───────────────────────────────────────────────────────────────────
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2600);
+}
+function initials(n) { return (n || "?").split(/\s+/).filter(Boolean).map(x => x[0]).join("").slice(0, 2).toUpperCase() || "?"; }
+function esc(s) { return (s || "").replace(/[&<>]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;"}[c])); }
+function today() { return new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short" }); }
+function getActive() { return people.find(p => p.id === activeId); }
+function showPage(id) { document.querySelectorAll(".page").forEach(p => p.classList.remove("active")); document.getElementById(id).classList.add("active"); }
+function updateBrand() {
+  const name = settings.companyName || "Outreach Agent";
+  document.getElementById("brand-name").textContent = name;
+  const h = document.getElementById("home-company");
+  if (h) h.textContent = name;
+}
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+function switchAuthTab(tab) {
+  document.getElementById("login-form").style.display = tab === "login" ? "" : "none";
+  document.getElementById("register-form").style.display = tab === "register" ? "" : "none";
+  document.getElementById("tab-login").className = "auth-tab" + (tab === "login" ? " active" : "");
+  document.getElementById("tab-register").className = "auth-tab" + (tab === "register" ? " active" : "");
+  document.getElementById("auth-err").textContent = "";
+  document.getElementById("reg-err").textContent = "";
+}
+
+async function doLogin() {
+  const email = document.getElementById("auth-email").value.trim();
+  const pass = document.getElementById("auth-password").value;
+  const errEl = document.getElementById("auth-err");
+  if (!email || !pass) { errEl.textContent = "Fill in both fields."; return; }
+  const btn = document.getElementById("auth-submit-btn");
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Signing in...';
+  try {
+    const data = await api("POST", "/auth/login", { email, password: pass });
+    token = data.access_token;
+    localStorage.setItem("oa_token", token);
+    await bootApp();
+  } catch(e) {
+    errEl.textContent = e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = "Sign In";
+  }
+}
+
+async function doRegister() {
+  const company = document.getElementById("reg-company").value.trim();
+  const email = document.getElementById("reg-email").value.trim();
+  const pass = document.getElementById("reg-password").value;
+  const errEl = document.getElementById("reg-err");
+  if (!company || !email || !pass) { errEl.textContent = "Fill in all fields."; return; }
+  const btn = document.getElementById("reg-submit-btn");
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Creating account...';
+  try {
+    const data = await api("POST", "/auth/register", { email, password: pass, company_name: company });
+    token = data.access_token;
+    localStorage.setItem("oa_token", token);
+    await bootApp();
+  } catch(e) {
+    errEl.textContent = e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = "Create Account";
+  }
+}
+
+function logout() {
+  token = "";
+  localStorage.removeItem("oa_token");
+  people = [];
+  activeId = null;
+  document.getElementById("main-app").style.display = "none";
+  document.getElementById("auth-screen").classList.add("open");
+  switchAuthTab("login");
+  closeSettings();
+}
+
+// ── App Bootstrap ─────────────────────────────────────────────────────────────
+async function bootApp() {
+  document.getElementById("auth-screen").classList.remove("open");
+  document.getElementById("main-app").style.display = "grid";
+  try {
+    const me = await api("GET", "/auth/me");
+    settings.companyName = me.company_name || "Outreach Agent";
+    settings.calendly = me.calendly || "https://cal.com/nexa-lead-qng40v/15min";
+    updateBrand();
+    await loadPeople();
+    showHome();
+  } catch(e) {
+    toast("Failed to load: " + e.message);
+  }
+}
+
+async function loadPeople() {
+  try {
+    const raw = await api("GET", "/people");
+    people = raw.map(normPerson);
+    renderAll();
+  } catch(e) {
+    toast("Could not load people: " + e.message);
+  }
+}
+
+// ── Settings ──────────────────────────────────────────────────────────────────
+function openSettings() {
+  document.getElementById("set-company").value = settings.companyName || "";
+  document.getElementById("set-cal").value = settings.calendly || "";
+  document.getElementById("settings-modal").classList.add("open");
+}
+function closeSettings() { document.getElementById("settings-modal").classList.remove("open"); }
+async function saveSettings() {
+  const company = document.getElementById("set-company").value.trim() || "Outreach Agent";
+  const cal = document.getElementById("set-cal").value.trim() || settings.calendly;
+  try {
+    await api("PUT", "/settings", { company_name: company, calendly: cal });
+    settings.companyName = company;
+    settings.calendly = cal;
+    updateBrand();
+    closeSettings();
+    toast("Settings saved");
+  } catch(e) {
+    toast("Error: " + e.message);
+  }
+}
+
+// ── New Person ────────────────────────────────────────────────────────────────
+function openNewPerson() { document.getElementById("new-modal").classList.add("open"); }
+function closeNewPerson() {
+  document.getElementById("new-modal").classList.remove("open");
+  document.getElementById("linkedin-url").value = "";
+  document.getElementById("profile-text").value = "";
+}
+
+async function createFromLinkedIn() {
+  const url = document.getElementById("linkedin-url").value.trim();
+  const profile = document.getElementById("profile-text").value.trim();
+  if (!url) { toast("Paste LinkedIn link first"); return; }
+  const btn = document.getElementById("create-btn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Creating...';
+  try {
+    toast("Analysing profile...");
+    // Step 1: AI extraction
+    const ai = await api("POST", "/ai/create-person", { linkedin_url: url, profile_text: profile });
+
+    // Step 2: Save to DB
+    const saved = await api("POST", "/people", {
+      name: ai.name,
+      role: ai.role,
+      service: ai.service,
+      linkedin_url: url,
+      profile_text: profile,
+      personalization: ai.personalization,
+      prospect_score: ai.prospect_score,
+      score_reason: ai.score_reason,
+      status: "active",
+      step: 1,
+      created: today(),
+      last_activity: "Today",
+      first_message: ai.step1_message,
+    });
+
+    const person = normPerson(saved);
+    people.unshift(person);
+    closeNewPerson();
+    openPerson(person.id);
+    toast("Person created");
+  } catch(e) {
+    toast("Error: " + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Auto-detect + create";
+  }
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderAll() { renderSidebar(); renderPeopleTable(); updateStats(); updateBrand(); if (activeId) renderConversation(); }
+
+function filterPeople() {
+  const q = document.getElementById("global-search")?.value.toLowerCase().trim() || "";
+  return people.filter(p => p.status !== "archived" && (!q || (p.name || "").toLowerCase().includes(q)));
+}
+
+function renderSidebar() {
+  const list = document.getElementById("people-list");
+  const arr = filterPeople();
+  if (!arr.length) { list.innerHTML = `<div class="note" style="padding:18px">No people yet</div>`; return; }
+  list.innerHTML = arr.map(p => `<div class="person ${p.id === activeId ? 'active' : ''}" onclick="openPerson(${p.id})">
+    <div class="avatar">${initials(p.name)}</div><div style="min-width:0">
+      <div class="p-name">${esc(p.name)}</div>
+      <div class="p-meta">Score ${esc((p.prospectScore || 5) + "/10")} · Step ${Math.min(p.step, 4)}/4 · ${esc(p.status)} · ${esc(p.lastActivity || "")}</div>
+    </div></div>`).join("");
+}
+
+function scoreClass(score) {
+  score = parseInt(score) || 0;
+  if (score >= 8) return "score-good";
+  if (score >= 5) return "score-mid";
+  return "score-low";
+}
+
+function renderPeopleTable() {
+  const body = document.getElementById("people-table");
+  const arr = filterPeople();
+  body.innerHTML = arr.map(p => `<tr onclick="openPerson(${p.id})" style="cursor:pointer">
+    <td><strong>${esc(p.name)}</strong><div class="note">${esc(p.linkedinUrl || "")}</div></td>
+    <td><span class="pill ${scoreClass(p.prospectScore)}">${esc((p.prospectScore || 5) + "/10")}</span><div class="note">${esc(p.scoreReason || "")}</div></td>
+    <td>${esc(p.role || "—")}</td>
+    <td>${esc(p.service || "—")}</td>
+    <td><span class="pill">${esc(p.status)}</span></td>
+    <td>Step ${Math.min(p.step, 4)}/4</td>
+    <td>${esc(p.lastActivity || "—")}</td>
+    <td>
+      <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openPerson(${p.id})">Open</button>
+      <button class="btn btn-red btn-sm" onclick="event.stopPropagation();deletePerson(${p.id})">Delete</button>
+    </td>
+  </tr>`).join("") || `<tr><td colspan="8" class="note">No matching people.</td></tr>`;
+}
+
+function updateStats() {
+  const active = people.filter(p => p.status !== "archived");
+  document.getElementById("stat-people").textContent = active.length;
+  document.getElementById("stat-replies").textContent = active.filter(p => p.status === "replied").length;
+  document.getElementById("stat-booked").textContent = active.filter(p => p.status === "booked").length;
+}
+
+function showHome() { activeId = null; document.getElementById("top-title").textContent = "Home"; showPage("page-welcome"); renderAll(); }
+function showPeople() { activeId = null; document.getElementById("top-title").textContent = "People View"; showPage("page-people"); renderAll(); }
+
+async function openPerson(id) {
+  activeId = id;
+  let local = people.find(p => p.id === id);
+  // Refresh from server to get latest messages
+  try {
+    const fresh = await api("GET", `/people/${id}`);
+    const norm = normPerson(fresh);
+    const idx = people.findIndex(p => p.id === id);
+    if (idx !== -1) people[idx] = norm;
+    else people.unshift(norm);
+    activeId = id;
+  } catch(e) { /* use local cache */ }
+  document.getElementById("top-title").textContent = getActive()?.name || "";
+  showPage("page-conv");
+  renderAll();
+}
+
+function renderConversation() {
+  const p = getActive(); if (!p) return;
+  document.getElementById("c-avatar").textContent = initials(p.name);
+  document.getElementById("c-name").textContent = p.name;
+  document.getElementById("c-role").textContent = [p.role, p.service, "Score " + (p.prospectScore || 5) + "/10"].filter(Boolean).join(" · ") || "—";
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById("step-" + i); el.className = "step";
+    if (i < p.step) el.classList.add("done"); else if (i === Math.min(p.step, 4)) el.classList.add("now");
+  }
+  const chat = document.getElementById("chat");
+  chat.innerHTML = p.messages.map((m, idx) => {
+    const cls = m.from === "you" ? "you" : m.from === "them" ? "them" : "ai";
+    const isAI = m.from === "ai";
+    const label = m.label || (m.from === "you" ? "You" : m.from === "them" ? p.name : "AI");
+    const copyLink = m.from === "you" ? ` · <span class="copy" onclick="copyMsg(${idx})">copy</span>` : "";
+    const editBtn = isAI ? ` · <span class="copy" style="color:var(--blue);cursor:pointer" onclick="openEditModal(${idx})" title="Edit this reply">✎ Edit</span>` : "";
+    const approveBtn = isAI ? ` · <span class="copy" style="color:var(--green);cursor:pointer" onclick="approveReply(${idx})" title="Approve this reply">✓ Approve</span>` : "";
+    const refineBtn = isAI ? ` · <span class="copy" style="color:var(--red);cursor:pointer" onclick="openFeedbackModal(${idx})" title="Give feedback to refine">✕ Refine</span>` : "";
+    return `<div class="msg ${cls}">
+      <div class="meta">${esc(label)}${copyLink}${editBtn}${approveBtn}${refineBtn}</div>
+      <div class="bubble">${esc(m.text)}</div>
+    </div>`;
+  }).join("");
+  setTimeout(() => { chat.scrollTop = chat.scrollHeight; }, 0);
+}
+
+function scrollChatBottom() { const c = document.getElementById("chat"); if (c) c.scrollTop = c.scrollHeight; }
+
+function copyMsg(idx) {
+  const p = getActive(); if (!p) return;
+  navigator.clipboard.writeText(p.messages[idx].text); toast("Copied");
+}
+
+// ── Generate Step ─────────────────────────────────────────────────────────────
+async function generateCurrentStep() {
+  const p = getActive(); if (!p) return;
+  let msg = "";
+  if (p.step === 1) {
+    msg = p.messages[0]?.text || "";
+  } else if (p.step === 2) {
+    msg = `Great to hear.\n\nOut of curiosity, where are most of your clients currently coming from?\nReferrals, LinkedIn, partnerships, speaking engagements, or something else?`;
+  } else if (p.step === 3) {
+    msg = `Makes sense.\n\nThat's actually why I asked.\n\nWe've been helping B2B consultants start more conversations with companies already looking for help with ${p.service || "their services"} through LinkedIn.\n\nWould you be open to a quick conversation tomorrow to see if it could make sense for your business?`;
+  } else if (p.step === 4) {
+    msg = `Perfect.\n\nGrab a time that works for you here:\n${settings.calendly}\n\nOur founder, Anish Wagle, will be the one taking the call and learning more about your business.\n\nLooking forward to speaking.`;
+  } else {
+    toast("Sequence complete"); return;
+  }
+
+  try {
+    const saved = await api("POST", `/people/${p.id}/messages`, {
+      from_role: "you",
+      label: `Step ${Math.min(p.step, 4)} · Generated`,
+      text: msg,
+      ts: Date.now(),
+    });
+    p.messages.push({ id: saved.id, from: "you", label: saved.label, text: saved.text, ts: saved.ts });
+    await api("PATCH", `/people/${p.id}`, { last_activity: "Today" });
+    p.lastActivity = "Today";
+    renderAll();
+    toast("Message generated");
+  } catch(e) { toast("Error: " + e.message); }
+}
+
+// ── Mark Sent / Booked ────────────────────────────────────────────────────────
+async function markSent() {
+  const p = getActive(); if (!p) return;
+  const newStep = p.step < 4 ? p.step + 1 : 4;
+  try {
+    await api("PATCH", `/people/${p.id}`, { step: newStep, status: "active", last_activity: "Today" });
+    p.step = newStep; p.status = "active"; p.lastActivity = "Today";
+    renderAll(); toast("Advanced");
+  } catch(e) { toast("Error: " + e.message); }
+}
+
+async function markBooked() {
+  const p = getActive(); if (!p) return;
+  try {
+    await api("PATCH", `/people/${p.id}`, { status: "booked", step: 4, last_activity: "Today" });
+    p.status = "booked"; p.step = 4; p.lastActivity = "Today";
+    renderAll(); toast("Marked booked");
+  } catch(e) { toast("Error: " + e.message); }
+}
+
+// ── Delete / Archive ──────────────────────────────────────────────────────────
+async function deletePerson(id) {
+  const p = people.find(x => x.id === id); if (!p) return;
+  if (!confirm("Delete " + p.name + " permanently? This cannot be undone.")) return;
+  try {
+    await api("DELETE", `/people/${id}`);
+    people = people.filter(x => x.id !== id);
+    if (activeId === id) activeId = null;
+    showPeople(); toast("Person deleted");
+  } catch(e) { toast("Error: " + e.message); }
+}
+function deleteCurrentPerson() { const p = getActive(); if (p) deletePerson(p.id); }
+
+async function archivePerson() {
+  const p = getActive(); if (!p) return;
+  try {
+    await api("PATCH", `/people/${p.id}`, { status: "archived", last_activity: "Today" });
+    p.status = "archived";
+    activeId = null; showPeople(); toast("Archived");
+  } catch(e) { toast("Error: " + e.message); }
+}
+
+// ── Handle Objection ──────────────────────────────────────────────────────────
+async function handleObjection() {
+  const p = getActive(); if (!p) { toast("Open a person first"); return; }
+  const box = document.getElementById("their-reply");
+  const btn = document.getElementById("handle-btn");
+  const reply = box.value.trim();
+  if (!reply) { toast("Paste their reply first"); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Thinking...';
+
+  try {
+    // 1. Save their reply message
+    const theirMsg = await api("POST", `/people/${p.id}/messages`, {
+      from_role: "them",
+      label: p.name,
+      text: reply,
+      ts: Date.now(),
+    });
+    p.messages.push({ id: theirMsg.id, from: "them", label: p.name, text: reply, ts: theirMsg.ts });
+    await api("PATCH", `/people/${p.id}`, { status: "replied", last_activity: "Today" });
+    p.status = "replied"; p.lastActivity = "Today";
+    box.value = "";
+    renderAll();
+    toast("Writing reply...");
+
+    // 2. Call AI handler
+    const result = await api("POST", "/ai/handle-reply", { person_id: p.id, reply_text: reply });
+
+    // 3. Save AI analysis message
+    const aiMsg = await api("POST", `/people/${p.id}/messages`, {
+      from_role: "ai",
+      label: "Suggested reply",
+      text: result.short_output,
+      ts: Date.now(),
+    });
+    p.messages.push({ id: aiMsg.id, from: "ai", label: "Suggested reply", text: result.short_output, ts: aiMsg.ts });
+
+    // 4. Update person score/status
+    let newStatus = "replied";
+    if (result.next_action === "close" || /cal\.com|grab a time|book a time|calendly/i.test(result.reply)) newStatus = "closing";
+    else if (result.next_action === "end_conversation" || result.intent === "bad_fit") newStatus = "weak";
+
+    await api("PATCH", `/people/${p.id}`, {
+      prospect_score: result.score,
+      score_reason: result.what_they_mean,
+      intent: result.intent,
+      next_action: result.next_action,
+      status: newStatus,
+      last_activity: "Today",
+    });
+    p.prospectScore = result.score;
+    p.scoreReason = result.what_they_mean;
+    p.intent = result.intent;
+    p.nextAction = result.next_action;
+    p.status = newStatus;
+    p.lastActivity = "Today";
+
+    renderAll(); toast("Reply ready");
+  } catch(e) {
+    toast("Error: " + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Handle reply";
+  }
+}
+
+// ── Approve / Refine Reply ────────────────────────────────────────────────────
+async function approveReply(msgIdx) {
+  const p = getActive(); if (!p) return;
+  const msg = p.messages[msgIdx];
+  if (msg.from !== "ai") return;
+  
+  try {
+    // Add the approved reply to the conversation as a "you" message
+    const saved = await api("POST", `/people/${p.id}/messages`, {
+      from_role: "you",
+      label: "You",
+      text: msg.text,
+      ts: Date.now(),
+    });
+    p.messages.push({ id: saved.id, from: "you", label: "You", text: saved.text, ts: saved.ts });
+    await api("PATCH", `/people/${p.id}`, { last_activity: "Today" });
+    p.lastActivity = "Today";
+    renderAll();
+    toast("Reply approved & sent");
+  } catch(e) {
+    toast("Error: " + e.message);
+  }
+}
+
+function openFeedbackModal(msgIdx) {
+  const p = getActive(); if (!p) return;
+  const msg = p.messages[msgIdx];
+  if (msg.from !== "ai") return;
+  
+  window.feedbackMsgIdx = msgIdx;
+  document.getElementById("feedback-modal").classList.add("open");
+  document.getElementById("feedback-text").value = "";
+  document.getElementById("feedback-text").focus();
+}
+
+function closeFeedbackModal() {
+  document.getElementById("feedback-modal").classList.remove("open");
+  window.feedbackMsgIdx = null;
+}
+
+async function submitFeedback() {
+  const p = getActive(); if (!p) return;
+  const feedback = document.getElementById("feedback-text").value.trim();
+  if (!feedback) { toast("Please describe what you want to change"); return; }
+  
+  const btn = document.getElementById("feedback-submit");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Refining...';
+  
+  try {
+    toast("Generating new reply...");
+    const result = await api("POST", "/ai/refine-reply", { person_id: p.id, feedback: feedback });
+    
+    // Update the AI message with the new reply
+    const msgIdx = window.feedbackMsgIdx;
+    p.messages[msgIdx].text = result.short_output;
+    
+    closeFeedbackModal();
+    renderAll();
+    toast("Reply refined");
+  } catch(e) {
+    toast("Error: " + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Refine reply";
+  }
+}
+
+// Handle Enter key in feedback box
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && e.ctrlKey && document.getElementById("feedback-modal").classList.contains("open")) {
+    submitFeedback();
+  }
+  if (e.key === "Enter" && e.ctrlKey && document.getElementById("edit-modal").classList.contains("open")) {
+    saveEditedReply();
+  }
+});
+
+// ── Edit Reply ────────────────────────────────────────────────────────────────
+function openEditModal(msgIdx) {
+  const p = getActive(); if (!p) return;
+  const msg = p.messages[msgIdx];
+  if (msg.from !== "ai") return;
+  
+  window.editMsgIdx = msgIdx;
+  const editArea = document.getElementById("edit-reply-text");
+  editArea.value = msg.text;
+  document.getElementById("edit-modal").classList.add("open");
+  editArea.focus();
+  editArea.select();
+}
+
+function closeEditModal() {
+  document.getElementById("edit-modal").classList.remove("open");
+  window.editMsgIdx = null;
+}
+
+function saveEditedReply() {
+  const p = getActive(); if (!p) return;
+  const msgIdx = window.editMsgIdx;
+  const newText = document.getElementById("edit-reply-text").value.trim();
+  
+  if (!newText) { toast("Reply text cannot be empty"); return; }
+  
+  // Update the message
+  p.messages[msgIdx].text = newText;
+  closeEditModal();
+  renderAll();
+  toast("Reply edited");
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+window.addEventListener("DOMContentLoaded", async () => {
+  if (token) {
+    try {
+      // Quick token verify
+      await api("GET", "/auth/me");
+      await bootApp();
+    } catch(e) {
+      // Token invalid, show auth
+      token = "";
+      localStorage.removeItem("oa_token");
+      document.getElementById("auth-screen").classList.add("open");
+    }
+  } else {
+    document.getElementById("auth-screen").classList.add("open");
+  }
+});
+</script>
+</body>
+</html>
