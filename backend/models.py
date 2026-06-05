@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, BigInteger, DateTime, func
 from sqlalchemy.orm import relationship
 from database import Base
+from sqlalchemy.sql import func
 
 
 class User(Base):
@@ -11,6 +12,7 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     company_name = Column(String, default="Outreach Agent")
     calendly = Column(String, default="https://cal.com/nexa-lead-qng40v/15min")
+    
     business_description = Column(String, default="")
     offer = Column(String, default="")
     target_customer = Column(String, default="")
