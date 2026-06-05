@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Outreach Agent V3 - Groq</title>
+<style>
+:root{
+  --bg:#0d0d10;--s1:#131318;--s2:#18181f;--s3:#20202a;--b1:rgba(255,255,255,.08);--b2:rgba(255,255,255,.14);
+  --t1:#f2f2f5;--t2:#aaaabb;--t3:#666678;--gold:#c9a84c;--gold2:#e8c97a;--green:#3ecf8e;--red:#f26b6b;--blue:#6aa0ff;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;--serif:Georgia,serif;
+}
+*{box-sizing:border-box}
+body{margin:0;height:100vh;background:var(--bg);color:var(--t1);font-family:var(--mono);font-size:12px;overflow:hidden}
+.app{display:grid;grid-template-columns:240px 1fr;height:100vh}
+.sidebar{background:var(--s1);border-right:1px solid var(--b1);display:flex;flex-direction:column}
+.brand{padding:18px 16px;border-bottom:1px solid var(--b1)}
+.brand-name{font-family:var(--serif);font-style:italic;font-size:23px;color:var(--gold2);cursor:pointer}
+.brand-tag{font-size:9px;color:var(--t3);letter-spacing:.8px;text-transform:uppercase;margin-top:3px}
+.btn{border:0;border-radius:7px;padding:9px 12px;font-family:var(--mono);font-size:11px;cursor:pointer}
+.btn-gold{background:var(--gold);color:#111;font-weight:700}
+.btn-ghost{background:transparent;color:var(--t2);border:1px solid var(--b1)}
+.btn-green{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25)}
+.btn-red{background:rgba(242,107,107,.12);color:var(--red);border:1px solid rgba(242,107,107,.25)}
+.btn-sm{padding:6px 9px;font-size:10px}
+.sidebar-actions{padding:12px;display:grid;gap:8px}
+.section{padding:10px 16px 5px;font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1px}
+.people-list{flex:1;overflow:auto}
+.person{padding:10px 14px;border-left:2px solid transparent;display:flex;gap:10px;cursor:pointer}
+.person:hover{background:rgba(255,255,255,.03)}
+.person.active{background:rgba(201,168,76,.10);border-left-color:var(--gold)}
+.avatar{width:30px;height:30px;border-radius:50%;border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;font-family:var(--serif);color:var(--gold2);background:var(--s3);flex:none}
+.p-name{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-meta{font-size:9px;color:var(--t3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:12px;border-top:1px solid var(--b1)}
+.stat{background:var(--s2);border:1px solid var(--b1);border-radius:8px;text-align:center;padding:8px 4px}
+.stat strong{font-family:var(--serif);font-size:17px;color:var(--gold2);display:block}
+.stat span{font-size:8px;color:var(--t3);text-transform:uppercase}
+.main{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}
+.topbar{height:58px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:10px;padding:0 20px}
+.title{font-family:var(--serif);font-style:italic;font-size:22px;flex:1}
+.search{width:230px;background:var(--s2);border:1px solid var(--b1);border-radius:7px;color:var(--t1);padding:8px 10px;font-family:var(--mono);font-size:11px;outline:none}
+.page{display:none;flex:1;min-height:0;overflow:hidden}
+.page.active{display:flex}
+.welcome{align-items:center;justify-content:center;text-align:center;color:var(--t3);flex-direction:column;padding:40px}
+.welcome h1{font-family:var(--serif);font-style:italic;color:var(--gold2);font-weight:400;font-size:42px;margin:0 0 8px}
+.conv{flex-direction:column;min-height:0;width:100%;overflow:hidden}
+.conv-head{padding:15px 20px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:12px}
+.conv-name{font-family:var(--serif);font-style:italic;font-size:18px}
+.conv-role{font-size:10px;color:var(--t3);margin-top:2px}
+.steps{display:flex;gap:0;width:380px;margin-left:auto}
+.step{flex:1;text-align:center;border:1px solid var(--b1);padding:6px 3px;font-size:9px;color:var(--t3)}
+.step:first-child{border-radius:6px 0 0 6px}.step:last-child{border-radius:0 6px 6px 0}.step+.step{border-left:0}
+.step.done{color:var(--green);background:rgba(62,207,142,.08)}
+.step.now{color:var(--gold);background:rgba(201,168,76,.1)}
+.chat{flex:1;min-height:0;overflow-y:auto;padding:18px 20px 28px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
+.msg{max-width:78%;line-height:1.65}
+.msg.you{align-self:flex-end}.msg.them{align-self:flex-start}.msg.ai{align-self:stretch;max-width:100%}
+.bubble{border:1px solid var(--b1);border-radius:10px;padding:12px 14px;white-space:pre-wrap}
+.you .bubble{background:var(--s3);border-color:var(--b2)}.them .bubble{background:var(--s2);color:var(--t2)}
+.ai .bubble{background:rgba(201,168,76,.08);border-color:rgba(201,168,76,.22);max-height:260px;overflow-y:auto}
+.score-good{color:var(--green);border-color:rgba(62,207,142,.35);background:rgba(62,207,142,.09)}
+.score-mid{color:var(--gold);border-color:rgba(201,168,76,.35);background:rgba(201,168,76,.09)}
+.score-low{color:var(--red);border-color:rgba(242,107,107,.35);background:rgba(242,107,107,.09)}
+.meta{font-size:9px;color:var(--t3);margin:0 2px 4px}.you .meta{text-align:right}
+.compose{border-top:1px solid var(--b1);padding:12px 20px;background:var(--s1);flex-shrink:0}
+.row{display:flex;gap:8px;align-items:center}.row.wrap{flex-wrap:wrap}
+textarea,input,select{background:var(--s2);border:1px solid var(--b1);border-radius:7px;color:var(--t1);font-family:var(--mono);font-size:11px;padding:9px 10px;outline:none}
+textarea{resize:vertical;line-height:1.55}
+.reply{flex:1;min-height:90px;max-height:150px;font-size:12px;padding:12px 13px}
+.people-page{flex-direction:column;width:100%;overflow:auto;padding:20px}
+.table{width:100%;border-collapse:collapse}
+th,td{border-bottom:1px solid var(--b1);padding:11px;text-align:left;font-size:11px}
+th{color:var(--t3);text-transform:uppercase;font-size:9px;letter-spacing:.8px}
+tr:hover td{background:rgba(255,255,255,.02)}
+.pill{padding:3px 7px;border-radius:4px;border:1px solid var(--b1);font-size:9px;text-transform:uppercase;color:var(--t2)}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:5}
+.modal-bg.open{display:flex}
+.modal{background:var(--s1);border:1px solid var(--b2);border-radius:12px;width:560px;max-width:94vw;max-height:92vh;overflow:auto;padding:22px}
+.modal h2{font-family:var(--serif);font-style:italic;color:var(--gold2);font-weight:400;margin:0 0 16px;font-size:22px}
+.field{margin-bottom:12px}.field label{display:block;color:var(--t3);font-size:9px;letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px}
+.field input,.field textarea,.field select{width:100%}
+.setup{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:10}
+.setup.open{display:flex}
+.setup-card{width:420px;max-width:92vw;background:var(--s1);border:1px solid var(--b2);border-radius:16px;padding:28px;text-align:center}
+.setup-card h1{font-family:var(--serif);font-style:italic;color:var(--gold2);font-weight:400}
+
+.home-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:22px;max-width:780px;width:100%}
+.home-card{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:16px;text-align:left}
+.home-card strong{display:block;color:var(--t1);font-size:13px;margin-bottom:6px}
+.home-card span{color:var(--t3);font-size:10px;line-height:1.6}
+.home-actions{display:flex;gap:10px;margin-top:22px;justify-content:center}
+@media(max-width:900px){.home-grid{grid-template-columns:1fr}.steps{display:none}}
+.toast{position:fixed;right:18px;bottom:18px;background:var(--s2);border:1px solid var(--b2);border-radius:8px;padding:10px 14px;color:var(--t1);opacity:0;transform:translateY(8px);transition:.2s;z-index:20}
+.toast.show{opacity:1;transform:translateY(0)}
+.note{font-size:10px;color:var(--t3);line-height:1.5}
+.copy{color:var(--gold);text-decoration:underline;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="setup" id="setup">
+  <div class="setup-card">
+    <h1>Welcome</h1>
+    <p class="note">Set your agency/company name once. You can change it later in Settings.</p>
+    <input id="setup-company" placeholder="Your company name" style="width:100%;margin:14px 0"/>
+    <button class="btn btn-gold" onclick="finishSetup()" style="width:100%">Continue</button>
+  </div>
+</div>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-name" id="brand-name" onclick="showHome()">Outreach Agent</div>
+      <div class="brand-tag">Groq powered CRM</div>
+    </div>
+    <div class="sidebar-actions">
+      <button class="btn btn-gold" onclick="openNewPerson()">+ New Person</button>
+      <button class="btn btn-ghost" onclick="showPeople()">People View</button>
+      <button class="btn btn-ghost" onclick="openSettings()">⚙ Settings</button>
+    </div>
+    <div class="section">People</div>
+    <div class="people-list" id="people-list"></div>
+    <div class="stats">
+      <div class="stat"><strong id="stat-people">0</strong><span>People</span></div>
+      <div class="stat"><strong id="stat-replies">0</strong><span>Replies</span></div>
+      <div class="stat"><strong id="stat-booked">0</strong><span>Booked</span></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="title" id="top-title">People View</div>
+      <input class="search" id="global-search" placeholder="Search person name..." oninput="renderAll()"/>
+    </div>
+
+    <section class="page active welcome" id="page-welcome">
+      <h1 id="home-company">Outreach Agent</h1>
+      <p style="max-width:560px;line-height:1.8">Your LinkedIn outreach workspace. Add a person, generate the first personalized message, track every chat, and handle replies with Charlie-style objection handling.</p>
+      <div class="home-actions">
+        <button class="btn btn-gold" onclick="openNewPerson()">+ New Person</button>
+        <button class="btn btn-ghost" onclick="showPeople()">Open People View</button>
+      </div>
+      <div class="home-grid">
+        <div class="home-card"><strong>1. Add LinkedIn link</strong><span>Paste the profile URL and optional profile text. The agent detects name, role, service, and writes the first message.</span></div>
+        <div class="home-card"><strong>2. Continue each chat</strong><span>Click any person from the sidebar to see the full conversation and generate the next step.</span></div>
+        <div class="home-card"><strong>3. Handle replies</strong><span>Paste their reply in the bigger reply box and get analysis plus the best message to send next.</span></div>
+      </div>
+    </section>
+
+    <section class="page people-page" id="page-people">
+      <table class="table">
+        <thead><tr><th>Person</th><th>Score</th><th>Role</th><th>Service</th><th>Status</th><th>Step</th><th>Last Activity</th><th>Action</th></tr></thead>
+        <tbody id="people-table"></tbody>
+      </table>
+    </section>
+
+    <section class="page conv" id="page-conv">
+      <div class="conv-head">
+        <div class="avatar" id="c-avatar">?</div>
+        <div>
+          <div class="conv-name" id="c-name">—</div>
+          <div class="conv-role" id="c-role">—</div>
+        </div>
+        <div class="steps">
+          <div class="step" id="step-1">1 · Connect</div>
+          <div class="step" id="step-2">2 · Ask</div>
+          <div class="step" id="step-3">3 · Pitch</div>
+          <div class="step" id="step-4">4 · Book</div>
+        </div>
+      </div>
+      <div class="chat" id="chat"></div>
+      <div class="compose">
+        <div class="row wrap" style="margin-bottom:9px">
+          <button class="btn btn-gold btn-sm" onclick="generateCurrentStep()">Generate current step</button>
+          <button class="btn btn-ghost btn-sm" onclick="scrollChatBottom()">↓ Bottom</button>
+          <button class="btn btn-green btn-sm" onclick="markSent()">✓ Sent / advance</button>
+          <button class="btn btn-green btn-sm" onclick="markBooked()">Mark booked</button>
+          <button class="btn btn-ghost btn-sm" onclick="archivePerson()">Archive</button>
+          <button class="btn btn-red btn-sm" onclick="deleteCurrentPerson()">Delete</button>
+        </div>
+        <div class="row">
+          <textarea class="reply" id="their-reply" placeholder="Paste their reply here for Charlie-style objection handling..."></textarea>
+          <button class="btn btn-gold" id="handle-btn" onclick="handleObjection()" style="align-self:stretch;min-width:115px">Handle reply</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modal-bg" id="new-modal">
+  <div class="modal">
+    <h2>New Person</h2>
+    <div class="field">
+      <label>LinkedIn Profile Link</label>
+      <input id="linkedin-url" placeholder="https://www.linkedin.com/in/name/"/>
+    </div>
+    <div class="field">
+      <label>Profile text backup (optional but recommended)</label>
+      <textarea id="profile-text" rows="7" placeholder="If LinkedIn link cannot be read, paste profile text here: headline, about, posts, experience."></textarea>
+      <div class="note">A normal browser HTML file usually cannot scrape LinkedIn directly because LinkedIn blocks cross-origin requests. The AI can infer from pasted text, and can use the URL slug as backup.</div>
+    </div>
+    <div class="row" style="justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeNewPerson()">Cancel</button>
+      <button class="btn btn-gold" onclick="createFromLinkedIn()">Auto-detect + create</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="settings-modal">
+  <div class="modal">
+    <h2>Settings</h2>
+    <div class="field"><label>Company Name</label><input id="set-company"/></div>
+    <div class="field"><label>Groq API Key</label><input id="set-key" type="password" placeholder="gsk_..."/></div>
+    <div class="field"><label>Groq Model</label>
+      <select id="set-model">
+        <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile</option>
+        <option value="llama-3.1-8b-instant">llama-3.1-8b-instant</option>
+      </select>
+    </div>
+    <div class="field"><label>Calendly Link</label><input id="set-cal" placeholder="https://cal.com/..."/></div>
+    <p class="note">Your key is saved only in this browser’s localStorage. For a real business tool, use a backend server so the key is never exposed in the browser.</p>
+    <div class="row" style="justify-content:flex-end">
+      <button class="btn btn-red" onclick="clearAll()">Clear all data</button>
+      <button class="btn btn-ghost" onclick="closeSettings()">Cancel</button>
+      <button class="btn btn-gold" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+let people = JSON.parse(localStorage.getItem("oa_people_v3_groq") || "[]");
+let activeId = null;
+
+const defaultSettings = {
+  companyName: "",
+  groqKey: "",
+  model: "llama-3.3-70b-versatile",
+  calendly: "https://cal.com/nexa-lead-qng40v/15min"
+};
+let settings = Object.assign(defaultSettings, JSON.parse(localStorage.getItem("oa_settings_v3_groq") || "{}"));
+
+function savePeople(){ localStorage.setItem("oa_people_v3_groq", JSON.stringify(people)); }
+function saveSet(){ localStorage.setItem("oa_settings_v3_groq", JSON.stringify(settings)); }
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2600); }
+function initials(n){ return (n||"?").split(/\s+/).filter(Boolean).map(x=>x[0]).join("").slice(0,2).toUpperCase() || "?"; }
+function esc(s){ return (s||"").replace(/[&<>]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+function today(){ return new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short"}); }
+function nowLabel(){ return "Today"; }
+function getActive(){ return people.find(p=>p.id===activeId); }
+function showPage(id){ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active")); document.getElementById(id).classList.add("active"); }
+function updateBrand(){
+  const name = settings.companyName || "Outreach Agent";
+  document.getElementById("brand-name").textContent = name;
+  const home = document.getElementById("home-company");
+  if(home) home.textContent = name;
+}
+function requireKey(){ if(!settings.groqKey){ openSettings(); toast("Add your Groq API key first"); return false; } return true; }
+
+async function groq(system, user, json=false){
+  if(!requireKey()) throw new Error("Missing Groq API key");
+  const body = {
+    model: settings.model || "llama-3.3-70b-versatile",
+    messages: [{role:"system",content:system},{role:"user",content:user}],
+    temperature: 0.55,
+    max_tokens: 900
+  };
+  if(json) body.response_format = {type:"json_object"};
+  const r = await fetch(GROQ_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json","Authorization":"Bearer " + settings.groqKey},
+    body:JSON.stringify(body)
+  });
+  const d = await r.json();
+  if(!r.ok) throw new Error(d.error?.message || "Groq API error");
+  return d.choices?.[0]?.message?.content?.trim() || "";
+}
+
+function finishSetup(){
+  const name = document.getElementById("setup-company").value.trim();
+  if(!name){ toast("Add your company name"); return; }
+  settings.companyName = name; saveSet(); updateBrand();
+  document.getElementById("setup").classList.remove("open");
+}
+
+function openSettings(){
+  document.getElementById("set-company").value = settings.companyName || "";
+  document.getElementById("set-key").value = settings.groqKey || "";
+  document.getElementById("set-model").value = settings.model || "llama-3.3-70b-versatile";
+  document.getElementById("set-cal").value = settings.calendly || "";
+  document.getElementById("settings-modal").classList.add("open");
+}
+function closeSettings(){ document.getElementById("settings-modal").classList.remove("open"); }
+function saveSettings(){
+  settings.companyName = document.getElementById("set-company").value.trim() || "Outreach Agent";
+  settings.groqKey = document.getElementById("set-key").value.trim();
+  settings.model = document.getElementById("set-model").value;
+  settings.calendly = document.getElementById("set-cal").value.trim() || defaultSettings.calendly;
+  saveSet(); updateBrand(); closeSettings(); toast("Settings saved");
+}
+function clearAll(){
+  if(confirm("Clear all people, chats, and settings?")){
+    localStorage.removeItem("oa_people_v3_groq"); localStorage.removeItem("oa_settings_v3_groq");
+    people=[]; settings=Object.assign({},defaultSettings); activeId=null; location.reload();
+  }
+}
+
+function openNewPerson(){ document.getElementById("new-modal").classList.add("open"); }
+function closeNewPerson(){ document.getElementById("new-modal").classList.remove("open"); document.getElementById("linkedin-url").value=""; document.getElementById("profile-text").value=""; }
+
+function slugName(url){
+  try{
+    let last = new URL(url).pathname.split("/").filter(Boolean).pop() || "";
+    last = last.replace(/[-_]+/g," ").replace(/\d+/g,"").trim();
+    return last.split(" ").map(w=>w? w[0].toUpperCase()+w.slice(1):"").join(" ") || "LinkedIn Person";
+  }catch(e){ return "LinkedIn Person"; }
+}
+
+
+function wordCount(s){
+  return (s || "").trim().split(/\s+/).filter(Boolean).length;
+}
+function cleanPersonalization(s){
+  s = (s || "").replace(/^Hey\s+\w+,?\s*/i,"").trim();
+  s = s.replace(/\s+/g," ");
+  return s;
+}
+
+async function createFromLinkedIn(){
+  const url = document.getElementById("linkedin-url").value.trim();
+  const profile = document.getElementById("profile-text").value.trim();
+  if(!url){ toast("Paste LinkedIn link first"); return; }
+  if(!requireKey()) return;
+
+  const fallbackName = slugName(url);
+  const sys = `You are an elite LinkedIn personalization writer for a B2B outbound agency.
+
+Return JSON only with these keys:
+name, role, service, personalization, prospectScore, scoreReason.
+
+PERSONALIZATION RULES:
+- Write ONLY the first personalization paragraph.
+- EXACTLY 28-35 words. Target 30 words.
+- Start with "I like how".
+- One paragraph only.
+- The goal is NOT to compliment.
+- The goal is to show you understand how the person thinks.
+- Focus on worldview, operating philosophy, strategic thinking, hidden belief, or how they approach growth.
+- Avoid generic lines like "connecting professionals", "building meaningful relationships", "innovative ways", "expertise", or "intrigued".
+- Do NOT mention title, years, awards, followers, clients, revenue, credentials, company size, or exact achievements.
+- Do NOT say noticed, impressive, congratulations, intrigued, I'd love to learn, or expertise.
+- Do NOT sound like AI.
+- Do NOT repeat profile wording directly.
+- Strong style example: "I like how your approach treats outbound as a repeatable operating system rather than a pile of tools and tactics. You seem focused on cleaner context, better data, and workflows teams can actually reuse."
+- Strong style example: "I like how your approach starts with fixing workflows before talking about AI. Most people treat automation as a technology problem, but you seem to view it as an operations problem first."
+
+PROSPECT SCORING:
+Give prospectScore from 1-10 based on fit for buying LinkedIn outbound help.
+8-10 = sells B2B services and likely wants more sales calls.
+5-7 = possible fit, unclear growth need.
+1-4 = poor fit, likely job seeker, employee, student, consumer, or not selling B2B services.
+
+If profile text is weak, infer carefully from URL/name but do not make up specific claims.`;
+  const user = `LinkedIn URL: ${url}
+Fallback name from URL: ${fallbackName}
+Profile text:
+${profile || "(No profile text pasted. Infer only from URL if possible.)"}`;
+
+  try{
+    toast("Creating person...");
+    const txt = await groq(sys,user,true);
+    let data;
+    try{ data = JSON.parse(txt); }catch(e){ data = {}; }
+    const name = (data.name || fallbackName || "LinkedIn Person").trim();
+    const first = name.split(" ")[0];
+    let personalization = cleanPersonalization(data.personalization || `I like how your work seems focused on solving business growth as a system rather than relying on random tactics. That practical, operator-led thinking stood out to me.`);
+    if(wordCount(personalization) < 28 || wordCount(personalization) > 35){
+      personalization = `I like how your work seems focused on solving growth as a system rather than relying on random tactics. That practical, operator-led way of thinking stood out to me.`;
+    }
+
+    const step1 = `Hey ${first}, ${personalization}
+
+Are you taking on more clients at the moment?
+Might have something relevant for you :)`;
+
+    const p = {
+      id: Date.now(),
+      name,
+      role: data.role || "",
+      service: data.service || "B2B consulting services",
+      prospectScore: Math.max(1, Math.min(10, parseInt(data.prospectScore) || 5)),
+      scoreReason: data.scoreReason || "Initial fit based on profile.",
+      linkedinUrl: url,
+      profileText: profile,
+      personalization,
+      status: "active",
+      step: 1,
+      created: today(),
+      lastActivity: nowLabel(),
+      messages: [{from:"you", label:"Step 1 · Connection / first message", text:step1, ts:Date.now()}]
+    };
+    people.unshift(p); savePeople(); closeNewPerson(); openPerson(p.id); toast("Person created");
+  }catch(e){ toast("Error: " + e.message); }
+}
+
+function renderAll(){ renderSidebar(); renderPeopleTable(); updateStats(); updateBrand(); if(activeId) renderConversation(); }
+function filterPeople(){
+  const q = document.getElementById("global-search")?.value.toLowerCase().trim() || "";
+  return people.filter(p => p.status !== "archived" && (!q || (p.name||"").toLowerCase().includes(q)));
+}
+function renderSidebar(){
+  const list = document.getElementById("people-list");
+  const arr = filterPeople();
+  if(!arr.length){ list.innerHTML = `<div class="note" style="padding:18px">No people yet</div>`; return; }
+  list.innerHTML = arr.map(p=>`<div class="person ${p.id===activeId?'active':''}" onclick="openPerson(${p.id})">
+    <div class="avatar">${initials(p.name)}</div><div style="min-width:0">
+      <div class="p-name">${esc(p.name)}</div>
+      <div class="p-meta">Score ${esc((p.prospectScore||5)+"/10")} · Step ${Math.min(p.step,4)}/4 · ${esc(p.status)} · ${esc(p.lastActivity||"")}</div>
+    </div></div>`).join("");
+}
+function scoreClass(score){
+  score = parseInt(score) || 0;
+  if(score >= 8) return "score-good";
+  if(score >= 5) return "score-mid";
+  return "score-low";
+}
+function renderPeopleTable(){
+  const body = document.getElementById("people-table");
+  const arr = filterPeople();
+  body.innerHTML = arr.map(p=>`<tr onclick="openPerson(${p.id})" style="cursor:pointer">
+    <td><strong>${esc(p.name)}</strong><div class="note">${esc(p.linkedinUrl||"")}</div></td>
+    <td><span class="pill ${scoreClass(p.prospectScore)}">${esc((p.prospectScore||5)+"/10")}</span><div class="note">${esc(p.scoreReason||"")}</div></td>
+    <td>${esc(p.role||"—")}</td>
+    <td>${esc(p.service||"—")}</td>
+    <td><span class="pill">${esc(p.status)}</span></td>
+    <td>Step ${Math.min(p.step,4)}/4</td>
+    <td>${esc(p.lastActivity||"—")}</td>
+    <td>
+      <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openPerson(${p.id})">Open</button>
+      <button class="btn btn-red btn-sm" onclick="event.stopPropagation();deletePerson(${p.id})">Delete</button>
+    </td>
+  </tr>`).join("") || `<tr><td colspan="8" class="note">No matching people.</td></tr>`;
+}
+function updateStats(){
+  const active = people.filter(p=>p.status!=="archived");
+  document.getElementById("stat-people").textContent = active.length;
+  document.getElementById("stat-replies").textContent = active.filter(p=>p.status==="replied").length;
+  document.getElementById("stat-booked").textContent = active.filter(p=>p.status==="booked").length;
+}
+function showHome(){ activeId=null; document.getElementById("top-title").textContent="Home"; showPage("page-welcome"); renderAll(); }
+function showPeople(){ activeId=null; document.getElementById("top-title").textContent="People View"; showPage("page-people"); renderAll(); }
+function openPerson(id){
+  activeId = id; const p=getActive(); if(!p) return;
+  document.getElementById("top-title").textContent=p.name;
+  showPage("page-conv"); renderAll();
+}
+
+function renderConversation(){
+  const p=getActive(); if(!p) return;
+  document.getElementById("c-avatar").textContent = initials(p.name);
+  document.getElementById("c-name").textContent = p.name;
+  document.getElementById("c-role").textContent = [p.role,p.service,("Score " + (p.prospectScore||5) + "/10")].filter(Boolean).join(" · ") || "—";
+  for(let i=1;i<=4;i++){
+    const el=document.getElementById("step-"+i); el.className="step";
+    if(i<p.step) el.classList.add("done"); else if(i===Math.min(p.step,4)) el.classList.add("now");
+  }
+  const chat=document.getElementById("chat");
+  chat.innerHTML = p.messages.map((m,idx)=>{
+    const cls = m.from==="you" ? "you" : m.from==="them" ? "them" : "ai";
+    return `<div class="msg ${cls}">
+      <div class="meta">${esc(m.label || (m.from==="you"?"You":m.from==="them"?p.name:"AI"))}${m.from==="you" ? ` · <span class="copy" onclick="copyMsg(${idx})">copy</span>` : ""}</div>
+      <div class="bubble">${esc(m.text)}</div>
+    </div>`;
+  }).join("");
+  setTimeout(()=>{ chat.scrollTop = chat.scrollHeight; }, 0);
+}
+function scrollChatBottom(){
+  const chat = document.getElementById("chat");
+  if(chat) chat.scrollTop = chat.scrollHeight;
+}
+function copyMsg(idx){
+  const p=getActive(); if(!p) return;
+  navigator.clipboard.writeText(p.messages[idx].text); toast("Copied");
+}
+
+async function generateCurrentStep(){
+  const p=getActive(); if(!p) return;
+  if(!requireKey()) return;
+  const first = p.name.split(" ")[0];
+  let msg = "";
+  try{
+    if(p.step===1){
+      msg = p.messages[0]?.text || "";
+    } else if(p.step===2){
+      msg = `Great to hear.
+
+Out of curiosity, where are most of your clients currently coming from?
+Referrals, LinkedIn, partnerships, speaking engagements, or something else?`;
+    } else if(p.step===3){
+      msg = `Makes sense.
+
+That's actually why I asked.
+
+We've been helping B2B consultants start more conversations with companies already looking for help with ${p.service || "their services"} through LinkedIn.
+
+Would you be open to a quick conversation tomorrow to see if it could make sense for your business?`;
+    } else if(p.step===4){
+      msg = `Perfect.
+
+Grab a time that works for you here:
+${settings.calendly}
+
+Our founder, Anish Wagle, will be the one taking the call and learning more about your business.
+
+Looking forward to speaking.`;
+    } else {
+      toast("Sequence complete"); return;
+    }
+    p.messages.push({from:"you", label:`Step ${Math.min(p.step,4)} · Generated`, text:msg, ts:Date.now()});
+    p.lastActivity = nowLabel(); savePeople(); renderAll(); toast("Message generated");
+  }catch(e){ toast("Error: "+e.message); }
+}
+function markSent(){
+  const p=getActive(); if(!p) return;
+  if(p.step < 4){ p.step += 1; p.status = "active"; }
+  else { p.step = 4; }
+  p.lastActivity = nowLabel(); savePeople(); renderAll(); toast("Advanced");
+}
+function markBooked(){
+  const p=getActive(); if(!p) return;
+  p.status="booked"; p.step=4; p.lastActivity=nowLabel(); savePeople(); renderAll(); toast("Marked booked");
+}
+
+function deletePerson(id){
+  const p = people.find(x => x.id === id);
+  if(!p) return;
+  if(confirm("Delete " + p.name + " permanently? This cannot be undone.")){
+    people = people.filter(x => x.id !== id);
+    if(activeId === id) activeId = null;
+    savePeople();
+    showPeople();
+    toast("Person deleted");
+  }
+}
+function deleteCurrentPerson(){
+  const p = getActive();
+  if(!p) return;
+  deletePerson(p.id);
+}
+
+function archivePerson(){
+  const p=getActive(); if(!p) return;
+  p.status="archived"; p.lastActivity=nowLabel(); savePeople(); activeId=null; showPeople(); toast("Archived");
+}
+
+async function handleObjection(){
+  const p=getActive(); if(!p){ toast("Open a person first"); return; }
+  const box = document.getElementById("their-reply");
+  const btn = document.getElementById("handle-btn");
+  const reply = box.value.trim();
+  if(!reply){ toast("Paste their reply first"); return; }
+  if(!requireKey()) return;
+
+  btn.disabled = true;
+  btn.textContent = "Thinking...";
+
+  p.messages.push({from:"them", label:p.name, text:reply, ts:Date.now()});
+  p.status="replied";
+  p.lastActivity=nowLabel();
+  savePeople();
+  renderAll();
+  box.value="";
+
+  const sys = `You are an elite LinkedIn outbound salesperson.
+
+Your only job is to create the best possible objection-handling reply.
+
+My offer:
+We help B2B consultants, coaches, fractional executives, advisors, agencies, and B2B service firms generate qualified sales conversations through LinkedIn outreach without spending their own time prospecting.
+
+Rules:
+1. Never argue with the prospect.
+2. Never defend the offer.
+3. Never sound needy, pushy, or desperate.
+4. Acknowledge the prospect's perspective naturally.
+5. Show you understand their situation.
+6. Reframe their objection naturally when useful.
+7. Sound like a smart business owner, not a salesperson.
+8. Do not follow scripts blindly. Adapt to what the prospect actually said.
+9. If the prospect is not a good fit, say so.
+10. If the prospect is showing buying signals, move toward a call.
+11. If the prospect is curious, continue the conversation.
+12. If the prospect is ready, close confidently.
+13. Never use sales clichés like:
+- "I completely understand"
+- "No worries"
+- "I'd love to"
+- "Let's hop on a call"
+
+Reply Length Rules:
+- Dead conversation / clear rejection: 10-25 words
+- Soft objection: 35-55 words
+- Curious prospect: 45-75 words
+- Strong objection: 55-90 words
+- Ready to book: 20-45 words
+
+The reply should usually be:
+- 2-5 short sentences
+- Under 90 words
+- Readable quickly
+- More thoughtful than a one-line script, but still natural
+
+Decision rules:
+- If they are curious, answer briefly and ask one useful question.
+- If they object but still show a possible business problem, acknowledge then ask one clarifying question.
+- If they are ready to book, close confidently using the Calendly link.
+- Do not use the Calendly link unless they clearly ask to talk, schedule, book, see times, or confirm they are open to a call.
+- If they say they are not trying to add clients, not interested, not looking, no need, not a priority, all set, already sorted, or they clearly reject the offer, score them 1-3/10 and end the conversation politely.
+- Do not try to save dead conversations.
+- For dead conversations, recommended reply should be simple, like: "Makes sense, thanks for letting me know." 
+
+Return JSON only:
+{
+  "whatTheyMean": "1-2 sentence analysis of what they are really saying",
+  "conversationState": "Dead | Weak | Curious | Qualified | Closing",
+  "whyThisState": "one sentence explaining if this is dead, needs qualifying, or is moving toward a call",
+  "score": 1-10,
+  "intent": "soft_objection | curious | strong_objection | ready_to_book | bad_fit",
+  "nextAction": "continue_conversation | qualify | close | end_conversation",
+  "reply": "actual message only"
+}`;
+
+  const user = `Prospect: ${p.name}
+Role: ${p.role}
+Service: ${p.service}
+Current score: ${p.prospectScore || 5}/10
+Calendly link only if ready to book: ${settings.calendly}
+
+Conversation so far:
+${p.messages.map(m => m.from + ": " + m.text).join("\\n\\n")}
+
+Prospect:
+${reply}
+
+Write the best natural reply for this exact situation.`;
+
+  try{
+    toast("Writing reply...");
+    const out = await groq(sys,user,true);
+    let data;
+    try{
+      data = JSON.parse(out);
+    }catch(e){
+      data = {
+        whatTheyMean: "They need a natural follow-up based on their reply.",
+        score: p.prospectScore || 5,
+        intent: "curious",
+        nextAction: "continue_conversation",
+        reply: out
+      };
+    }
+
+    let aiReply = (data.reply || "").trim();
+
+    const hardRejection = /(not\s+(trying|looking|interested)|don'?t\s+(need|want)|no\s+(need|thanks|thank you)|all\s+set|already\s+(sorted|covered|good)|not\s+a\s+priority|not\s+right\s+now|no\s+thanks|thanks\s+but)/i.test(reply);
+
+    if(hardRejection){
+      data.whatTheyMean = "They are clearly not looking to add clients or explore acquisition help right now.";
+      data.conversationState = "Dead";
+      data.whyThisState = "They gave a direct rejection with no curiosity or buying signal, so the best move is to end politely.";
+      data.intent = "bad_fit";
+      data.nextAction = "end_conversation";
+      data.score = 2;
+      aiReply = "Makes sense, thanks for letting me know. Appreciate the quick reply.";
+    }
+
+    const score = Math.max(1, Math.min(10, parseInt(data.score) || p.prospectScore || 5));
+    const intent = data.intent || "curious";
+    const nextAction = data.nextAction || "continue_conversation";
+
+    const clearBookingIntent = /(book|schedule|call|chat|talk|meeting|send.*link|send.*calendar|calendly|time works|availability|speak|connect|yes.*call|open.*call)/i.test(reply);
+
+    if((nextAction === "close" || intent === "ready_to_book") && !/cal\\.com|calendly|grab a time/i.test(aiReply)){
+      aiReply = `Perfect.
+
+Grab a time that works for you here:
+${settings.calendly}
+
+Our founder, Anish Wagle, will be the one taking the call and learning more about your business.`;
+    }
+
+    if(!clearBookingIntent && /cal\\.com|grab a time|book a time|calendar|calendly/i.test(aiReply)){
+      aiReply = `Makes sense.
+
+What I had in mind was helping you start more qualified conversations through LinkedIn without you having to do the outreach yourself.
+
+Out of curiosity, are referrals doing enough to hit your growth targets right now, or are you also keeping an eye on more predictable acquisition channels?`;
+    }
+
+    p.prospectScore = score;
+    p.scoreReason = data.whatTheyMean || data.analysis || p.scoreReason || "";
+    p.intent = intent;
+    p.nextAction = nextAction;
+
+    if(nextAction === "close" || /cal\\.com|grab a time|book a time|calendly/i.test(aiReply)){
+      p.status = "closing";
+      p.step = 4;
+    } else if(nextAction === "end_conversation" || intent === "bad_fit"){
+      p.status = "weak";
+    } else {
+      p.status = "replied";
+    }
+
+    const state = data.conversationState || (
+      nextAction === "end_conversation" ? "Dead" :
+      nextAction === "close" ? "Closing" :
+      score >= 8 ? "Qualified" :
+      score >= 5 ? "Curious" : "Weak"
+    );
+
+    const whyState = data.whyThisState || (
+      state === "Dead" ? "There is no clear buying signal, so the safest move is to end politely." :
+      state === "Closing" ? "They are showing enough intent to move toward a call." :
+      state === "Qualified" ? "There is enough interest to keep moving toward a call." :
+      state === "Curious" ? "They are open enough to continue, but still need qualifying." :
+      "There is low signal, so avoid pushing."
+    );
+
+    const shortOutput = `Conversation state:
+${state}
+
+What they're really saying:
+${data.whatTheyMean || data.analysis || "They need a natural follow-up."}
+
+Why:
+${whyState}
+
+Lead score:
+${score}/10
+
+Recommended reply:
+${aiReply}`;
+
+    p.messages.push({from:"ai", label:"Suggested reply", text:shortOutput, ts:Date.now()});
+    savePeople();
+    renderAll();
+    toast("Reply ready");
+  }catch(e){
+    toast("Error: " + e.message);
+  }finally{
+    btn.disabled = false;
+    btn.textContent = "Handle reply";
+  }
+}
+
+window.addEventListener("DOMContentLoaded",()=>{
+  updateBrand();
+  if(!settings.companyName){ document.getElementById("setup").classList.add("open"); }
+  renderAll();
+  showHome();
+});
+</script>
+</body>
+</html>
