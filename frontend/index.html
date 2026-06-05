@@ -836,7 +836,7 @@ document.addEventListener("keydown", (e) => {
 
 window.addEventListener("DOMContentLoaded", async () => {
   if(token){
-    try { await api("GET", "/auth/me"); await bootApp(); }
+    try { await api("GET", "/api/auth/me"); await bootApp(); }
     catch(e){ token=""; localStorage.removeItem("oa_token"); document.getElementById("auth-screen").classList.add("open"); }
   } else {
     document.getElementById("auth-screen").classList.add("open");
