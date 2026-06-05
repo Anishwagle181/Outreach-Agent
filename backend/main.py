@@ -74,7 +74,7 @@ app.include_router(settings_router.router, prefix="/api")
 def health():
     return {"status": "ok"}
 
-FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
+FRONTEND_DIR =os.path.abspath(os.path.join(os.getcwd(), "..", "frontend"))
 
 if os.path.isdir(FRONTEND_DIR):
     app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
@@ -82,3 +82,20 @@ if os.path.isdir(FRONTEND_DIR):
     @app.get("/")
     def serve_frontend():
         return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
+    
+    FRONTEND_DIR = os.path.abspath(os.path.join(os.getcwd(), "..", "frontend"))
+
+if os.path.isdir(FRONTEND_DIR):
+    app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
+
+    @app.get("/")
+    def serve_frontend():
+        return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
+else:
+    @app.get("/")
+    def frontend_missing():
+        return {
+            "error": "Frontend folder not found",
+            "cwd": os.getcwd(),
+            "frontend_dir": FRONTEND_DIR,
+        }
