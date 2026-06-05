@@ -3,32 +3,54 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Outreach Agent — Nexa Lead</title>
+<title>Outreach Agent</title>
 <style>
 :root{
-  --bg:#0d0d10;--s1:#131318;--s2:#18181f;--s3:#20202a;--b1:rgba(255,255,255,.08);--b2:rgba(255,255,255,.14);
-  --t1:#f2f2f5;--t2:#aaaabb;--t3:#666678;--gold:#c9a84c;--gold2:#e8c97a;--green:#3ecf8e;--red:#f26b6b;--blue:#6aa0ff;
+  --bg:#0d0d10;--s1:#131318;--s2:#18181f;--s3:#20202a;--s4:#292936;
+  --b1:rgba(255,255,255,.08);--b2:rgba(255,255,255,.14);
+  --t1:#f2f2f5;--t2:#aaaabb;--t3:#666678;
+  --gold:#c9a84c;--gold2:#e8c97a;--green:#3ecf8e;--red:#f26b6b;--blue:#6aa0ff;
   --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;--serif:Georgia,serif;
 }
 *{box-sizing:border-box}
 body{margin:0;height:100vh;background:var(--bg);color:var(--t1);font-family:var(--mono);font-size:12px;overflow:hidden}
-.app{display:grid;grid-template-columns:240px 1fr;height:100vh}
-.sidebar{background:var(--s1);border-right:1px solid var(--b1);display:flex;flex-direction:column}
+button,input,textarea,select{font-family:var(--mono)}
+button{cursor:pointer}
+.btn{border:0;border-radius:7px;padding:9px 12px;background:var(--s2);border:1px solid var(--b1);color:var(--t2);font-size:11px}
+.btn:hover{border-color:var(--b2);color:var(--t1)}
+.btn-gold{background:var(--gold);color:#111;font-weight:700;border-color:transparent}
+.btn-green{background:rgba(62,207,142,.12);color:var(--green);border-color:rgba(62,207,142,.3)}
+.btn-red{background:rgba(242,107,107,.12);color:var(--red);border-color:rgba(242,107,107,.3)}
+.btn-sm{font-size:10px;padding:6px 9px}
+input,textarea,select{background:var(--s2);border:1px solid var(--b1);border-radius:7px;color:var(--t1);font-size:11px;padding:9px 10px;outline:none;width:100%}
+textarea{resize:vertical;line-height:1.55}
+input:focus,textarea:focus{border-color:var(--gold)}
+.note{font-size:10px;color:var(--t3);line-height:1.6}
+.err{color:var(--red);font-size:10px;min-height:16px;margin-top:8px}
+.spinner{display:inline-block;width:10px;height:10px;border:2px solid var(--b2);border-top-color:var(--gold);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:4px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Auth */
+.auth-screen{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:30}
+.auth-screen.open{display:flex}
+.auth-card{width:430px;max-width:92vw;background:var(--s1);border:1px solid var(--b2);border-radius:16px;padding:28px;text-align:center}
+.auth-card h1{font-family:var(--serif);font-style:italic;color:var(--gold2);font-weight:400;margin:0 0 6px;font-size:31px}
+.auth-tab-row{display:flex;border:1px solid var(--b1);border-radius:8px;overflow:hidden;margin:20px 0}
+.auth-tab{flex:1;background:transparent;border:0;padding:9px;color:var(--t3)}
+.auth-tab.active{background:var(--s3);color:var(--t1)}
+
+/* App layout */
+.app{display:grid;grid-template-columns:250px 1fr;height:100vh}
+.sidebar{background:var(--s1);border-right:1px solid var(--b1);display:flex;flex-direction:column;min-height:0}
 .brand{padding:18px 16px;border-bottom:1px solid var(--b1)}
-.brand-name{font-family:var(--serif);font-style:italic;font-size:23px;color:var(--gold2);cursor:pointer}
+.brand-name{font-family:var(--serif);font-style:italic;font-size:24px;color:var(--gold2);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .brand-tag{font-size:9px;color:var(--t3);letter-spacing:.8px;text-transform:uppercase;margin-top:3px}
-.btn{border:0;border-radius:7px;padding:9px 12px;font-family:var(--mono);font-size:11px;cursor:pointer}
-.btn-gold{background:var(--gold);color:#111;font-weight:700}
-.btn-ghost{background:transparent;color:var(--t2);border:1px solid var(--b1)}
-.btn-green{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25)}
-.btn-red{background:rgba(242,107,107,.12);color:var(--red);border:1px solid rgba(242,107,107,.25)}
-.btn-sm{padding:6px 9px;font-size:10px}
 .sidebar-actions{padding:12px;display:grid;gap:8px}
 .section{padding:10px 16px 5px;font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1px}
 .people-list{flex:1;overflow:auto}
 .person{padding:10px 14px;border-left:2px solid transparent;display:flex;gap:10px;cursor:pointer}
 .person:hover{background:rgba(255,255,255,.03)}
-.person.active{background:rgba(201,168,76,.10);border-left-color:var(--gold)}
+.person.active{background:rgba(201,168,76,.1);border-left-color:var(--gold)}
 .avatar{width:30px;height:30px;border-radius:50%;border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;font-family:var(--serif);color:var(--gold2);background:var(--s3);flex:none}
 .p-name{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .p-meta{font-size:9px;color:var(--t3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -39,11 +61,29 @@ body{margin:0;height:100vh;background:var(--bg);color:var(--t1);font-family:var(
 .main{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}
 .topbar{height:58px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:10px;padding:0 20px}
 .title{font-family:var(--serif);font-style:italic;font-size:22px;flex:1}
-.search{width:230px;background:var(--s2);border:1px solid var(--b1);border-radius:7px;color:var(--t1);padding:8px 10px;font-family:var(--mono);font-size:11px;outline:none}
+.search{width:240px}
 .page{display:none;flex:1;min-height:0;overflow:hidden}
 .page.active{display:flex}
 .welcome{align-items:center;justify-content:center;text-align:center;color:var(--t3);flex-direction:column;padding:40px}
-.welcome h1{font-family:var(--serif);font-style:italic;color:var(--gold2);font-weight:400;font-size:42px;margin:0 0 8px}
+.welcome h1{font-family:var(--serif);font-style:italic;color:var(--gold2);font-weight:400;font-size:44px;margin:0 0 8px}
+.home-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:22px;max-width:820px;width:100%}
+.home-card{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:16px;text-align:left}
+.home-card strong{display:block;color:var(--t1);font-size:13px;margin-bottom:6px}
+.home-card span{color:var(--t3);font-size:10px;line-height:1.6}
+.home-actions{display:flex;gap:10px;margin-top:22px;justify-content:center}
+
+/* People */
+.people-page{flex-direction:column;width:100%;overflow:auto;padding:20px}
+.table{width:100%;border-collapse:collapse}
+th,td{border-bottom:1px solid var(--b1);padding:11px;text-align:left;font-size:11px;vertical-align:top}
+th{color:var(--t3);text-transform:uppercase;font-size:9px;letter-spacing:.8px}
+tr:hover td{background:rgba(255,255,255,.02)}
+.pill{padding:3px 7px;border-radius:4px;border:1px solid var(--b1);font-size:9px;text-transform:uppercase;color:var(--t2);display:inline-block}
+.score-good{color:var(--green);border-color:rgba(62,207,142,.35);background:rgba(62,207,142,.09)}
+.score-mid{color:var(--gold);border-color:rgba(201,168,76,.35);background:rgba(201,168,76,.09)}
+.score-low{color:var(--red);border-color:rgba(242,107,107,.35);background:rgba(242,107,107,.09)}
+
+/* Conversation */
 .conv{flex-direction:column;min-height:0;width:100%;overflow:hidden}
 .conv-head{padding:15px 20px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:12px}
 .conv-name{font-family:var(--serif);font-style:italic;font-size:18px}
@@ -58,92 +98,68 @@ body{margin:0;height:100vh;background:var(--bg);color:var(--t1);font-family:var(
 .msg.you{align-self:flex-end}.msg.them{align-self:flex-start}.msg.ai{align-self:stretch;max-width:100%}
 .bubble{border:1px solid var(--b1);border-radius:10px;padding:12px 14px;white-space:pre-wrap}
 .you .bubble{background:var(--s3);border-color:var(--b2)}.them .bubble{background:var(--s2);color:var(--t2)}
-.ai .bubble{background:rgba(201,168,76,.08);border-color:rgba(201,168,76,.22);max-height:260px;overflow-y:auto}
-.score-good{color:var(--green);border-color:rgba(62,207,142,.35);background:rgba(62,207,142,.09)}
-.score-mid{color:var(--gold);border-color:rgba(201,168,76,.35);background:rgba(201,168,76,.09)}
-.score-low{color:var(--red);border-color:rgba(242,107,107,.35);background:rgba(242,107,107,.09)}
+.ai .bubble{background:rgba(201,168,76,.08);border-color:rgba(201,168,76,.22);max-height:330px;overflow-y:auto}
 .meta{font-size:9px;color:var(--t3);margin:0 2px 4px}.you .meta{text-align:right}
-.compose{border-top:1px solid var(--b1);padding:12px 20px;background:var(--s1);flex-shrink:0}
-.row{display:flex;gap:8px;align-items:center}.row.wrap{flex-wrap:wrap}
-textarea,input,select{background:var(--s2);border:1px solid var(--b1);border-radius:7px;color:var(--t1);font-family:var(--mono);font-size:11px;padding:9px 10px;outline:none}
-textarea{resize:vertical;line-height:1.55}
-.reply{flex:1;min-height:90px;max-height:150px;font-size:12px;padding:12px 13px}
-.people-page{flex-direction:column;width:100%;overflow:auto;padding:20px}
-.table{width:100%;border-collapse:collapse}
-th,td{border-bottom:1px solid var(--b1);padding:11px;text-align:left;font-size:11px}
-th{color:var(--t3);text-transform:uppercase;font-size:9px;letter-spacing:.8px}
-tr:hover td{background:rgba(255,255,255,.02)}
-.pill{padding:3px 7px;border-radius:4px;border:1px solid var(--b1);font-size:9px;text-transform:uppercase;color:var(--t2)}
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:5}
-.modal-bg.open{display:flex}
-.modal{background:var(--s1);border:1px solid var(--b2);border-radius:12px;width:560px;max-width:94vw;max-height:92vh;overflow:auto;padding:22px}
-.modal h2{font-family:var(--serif);font-style:italic;color:var(--gold2);font-weight:400;margin:0 0 16px;font-size:22px}
-.field{margin-bottom:12px}.field label{display:block;color:var(--t3);font-size:9px;letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px}
-.field input,.field textarea,.field select{width:100%}
-.auth-screen{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:10}
-.auth-screen.open{display:flex}
-.auth-card{width:420px;max-width:92vw;background:var(--s1);border:1px solid var(--b2);border-radius:16px;padding:28px;text-align:center}
-.auth-card h1{font-family:var(--serif);font-style:italic;color:var(--gold2);font-weight:400;margin:0 0 6px}
-.auth-tab-row{display:flex;gap:0;margin-bottom:20px;border:1px solid var(--b1);border-radius:7px;overflow:hidden}
-.auth-tab{flex:1;padding:8px;background:transparent;border:0;color:var(--t3);font-family:var(--mono);font-size:11px;cursor:pointer}
-.auth-tab.active{background:var(--s3);color:var(--t1)}
-.home-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:22px;max-width:780px;width:100%}
-.home-card{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:16px;text-align:left}
-.home-card strong{display:block;color:var(--t1);font-size:13px;margin-bottom:6px}
-.home-card span{color:var(--t3);font-size:10px;line-height:1.6}
-.home-actions{display:flex;gap:10px;margin-top:22px;justify-content:center}
-@media(max-width:900px){.home-grid{grid-template-columns:1fr}.steps{display:none}}
-.toast{position:fixed;right:18px;bottom:18px;background:var(--s2);border:1px solid var(--b2);border-radius:8px;padding:10px 14px;color:var(--t1);opacity:0;transform:translateY(8px);transition:.2s;z-index:20}
-.toast.show{opacity:1;transform:translateY(0)}
-.note{font-size:10px;color:var(--t3);line-height:1.5}
 .copy{color:var(--gold);text-decoration:underline;cursor:pointer}
-.err{color:var(--red);font-size:10px;margin-top:8px;min-height:16px}
-.spinner{display:inline-block;width:10px;height:10px;border:2px solid var(--b2);border-top-color:var(--gold);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:4px}
-@keyframes spin{to{transform:rotate(360deg)}}
+.compose{border-top:1px solid var(--b1);padding:12px 20px;background:var(--s1);flex-shrink:0}
+.row{display:flex;gap:8px;align-items:center}
+.row.wrap{flex-wrap:wrap}
+.reply{flex:1;min-height:95px;max-height:170px;font-size:12px;padding:12px 13px}
+
+/* Modals */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:20}
+.modal-bg.open{display:flex}
+.modal{background:var(--s1);border:1px solid var(--b2);border-radius:12px;width:640px;max-width:94vw;max-height:92vh;overflow:auto;padding:22px}
+.modal.wide{width:820px}
+.modal h2{font-family:var(--serif);font-style:italic;color:var(--gold2);font-weight:400;margin:0 0 16px;font-size:24px}
+.field{margin-bottom:12px}
+.field label{display:block;color:var(--t3);font-size:9px;letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+hr{border:0;border-top:1px solid var(--b1);margin:15px 0}
+.toast{position:fixed;right:18px;bottom:18px;background:var(--s2);border:1px solid var(--b2);border-radius:8px;padding:10px 14px;color:var(--t1);opacity:0;transform:translateY(8px);transition:.2s;z-index:40}
+.toast.show{opacity:1;transform:translateY(0)}
+.onboarding-badge{font-size:9px;color:var(--gold);background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);border-radius:999px;padding:4px 9px;display:inline-block;margin-bottom:10px}
+@media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{display:none}.home-grid,.grid2,.grid3{grid-template-columns:1fr}.steps{display:none}.search{display:none}.msg{max-width:92%}}
 </style>
 </head>
 <body>
 
-<!-- ── Auth Screen ───────────────────────────────────────────────────────── -->
 <div class="auth-screen" id="auth-screen">
   <div class="auth-card">
     <h1>Outreach Agent</h1>
-    <p class="note" style="margin-bottom:18px">Groq-powered LinkedIn CRM</p>
+    <p class="note">Business-specific LinkedIn outreach CRM</p>
     <div class="auth-tab-row">
       <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Sign In</button>
       <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Create Account</button>
     </div>
-
-    <!-- Login form -->
     <div id="login-form">
-      <div class="field"><label>Email</label><input id="auth-email" type="email" placeholder="you@company.com" autocomplete="email"/></div>
-      <div class="field"><label>Password</label><input id="auth-password" type="password" placeholder="••••••••" autocomplete="current-password"/></div>
+      <div class="field"><label>Email</label><input id="auth-email" type="email" placeholder="you@company.com"/></div>
+      <div class="field"><label>Password</label><input id="auth-password" type="password" placeholder="••••••••"/></div>
       <div class="err" id="auth-err"></div>
-      <button class="btn btn-gold" id="auth-submit-btn" onclick="doLogin()" style="width:100%;margin-top:4px">Sign In</button>
+      <button class="btn btn-gold" id="auth-submit-btn" onclick="doLogin()" style="width:100%">Sign In</button>
     </div>
-
-    <!-- Register form -->
     <div id="register-form" style="display:none">
       <div class="field"><label>Company / Agency Name</label><input id="reg-company" placeholder="Your company name"/></div>
-      <div class="field"><label>Email</label><input id="reg-email" type="email" placeholder="you@company.com" autocomplete="email"/></div>
-      <div class="field"><label>Password</label><input id="reg-password" type="password" placeholder="Choose a password" autocomplete="new-password"/></div>
+      <div class="field"><label>Email</label><input id="reg-email" type="email" placeholder="you@company.com"/></div>
+      <div class="field"><label>Password</label><input id="reg-password" type="password" placeholder="Choose a password"/></div>
       <div class="err" id="reg-err"></div>
-      <button class="btn btn-gold" id="reg-submit-btn" onclick="doRegister()" style="width:100%;margin-top:4px">Create Account</button>
+      <button class="btn btn-gold" id="reg-submit-btn" onclick="doRegister()" style="width:100%">Create Account</button>
     </div>
   </div>
 </div>
 
-<!-- ── Main App ──────────────────────────────────────────────────────────── -->
 <div class="app" id="main-app" style="display:none">
   <aside class="sidebar">
     <div class="brand">
       <div class="brand-name" id="brand-name" onclick="showHome()">Outreach Agent</div>
-      <div class="brand-tag">Groq powered CRM</div>
+      <div class="brand-tag">AI Outreach CRM</div>
     </div>
     <div class="sidebar-actions">
       <button class="btn btn-gold" onclick="openNewPerson()">+ New Person</button>
-      <button class="btn btn-ghost" onclick="showPeople()">People View</button>
-      <button class="btn btn-ghost" onclick="openSettings()">⚙ Settings</button>
+      <button class="btn" onclick="showPeople()">People View</button>
+      <button class="btn" onclick="openBusinessSetup(false)">Business Settings</button>
+      <button class="btn btn-red" onclick="logout()">Log out</button>
     </div>
     <div class="section">People</div>
     <div class="people-list" id="people-list"></div>
@@ -162,15 +178,18 @@ tr:hover td{background:rgba(255,255,255,.02)}
 
     <section class="page active welcome" id="page-welcome">
       <h1 id="home-company">Outreach Agent</h1>
-      <p style="max-width:560px;line-height:1.8">Your LinkedIn outreach workspace. Add a person, generate the first personalized message, track every chat, and handle replies with Charlie-style objection handling.</p>
+      <p style="max-width:620px;line-height:1.8">
+        Add prospects, generate business-specific personalization, handle replies based on your offer, and track every conversation.
+      </p>
       <div class="home-actions">
         <button class="btn btn-gold" onclick="openNewPerson()">+ New Person</button>
-        <button class="btn btn-ghost" onclick="showPeople()">Open People View</button>
+        <button class="btn" onclick="showPeople()">Open People View</button>
+        <button class="btn" onclick="openBusinessSetup(false)">Edit Business Setup</button>
       </div>
       <div class="home-grid">
-        <div class="home-card"><strong>1. Add LinkedIn link</strong><span>Paste the profile URL and optional profile text. The agent detects name, role, service, and writes the first message.</span></div>
-        <div class="home-card"><strong>2. Continue each chat</strong><span>Click any person from the sidebar to see the full conversation and generate the next step.</span></div>
-        <div class="home-card"><strong>3. Handle replies</strong><span>Paste their reply in the bigger reply box and get analysis plus the best message to send next.</span></div>
+        <div class="home-card"><strong>1. Describe your business</strong><span>The AI learns your offer, ICP, scripts, tone, and objection style.</span></div>
+        <div class="home-card"><strong>2. Add LinkedIn profiles</strong><span>Paste a LinkedIn URL and optional profile text. The AI writes a 30-word personalized opener.</span></div>
+        <div class="home-card"><strong>3. Handle replies</strong><span>Paste a reply. The AI scores the lead, explains the state, and gives the next message.</span></div>
       </div>
     </section>
 
@@ -199,14 +218,13 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <div class="compose">
         <div class="row wrap" style="margin-bottom:9px">
           <button class="btn btn-gold btn-sm" onclick="generateCurrentStep()">Generate current step</button>
-          <button class="btn btn-ghost btn-sm" onclick="scrollChatBottom()">↓ Bottom</button>
           <button class="btn btn-green btn-sm" onclick="markSent()">✓ Sent / advance</button>
           <button class="btn btn-green btn-sm" onclick="markBooked()">Mark booked</button>
-          <button class="btn btn-ghost btn-sm" onclick="archivePerson()">Archive</button>
+          <button class="btn btn-sm" onclick="scrollChatBottom()">↓ Bottom</button>
           <button class="btn btn-red btn-sm" onclick="deleteCurrentPerson()">Delete</button>
         </div>
         <div class="row">
-          <textarea class="reply" id="their-reply" placeholder="Paste their reply here for Charlie-style objection handling..."></textarea>
+          <textarea class="reply" id="their-reply" placeholder="Paste their reply here..."></textarea>
           <button class="btn btn-gold" id="handle-btn" onclick="handleObjection()" style="align-self:stretch;min-width:115px">Handle reply</button>
         </div>
       </div>
@@ -214,86 +232,166 @@ tr:hover td{background:rgba(255,255,255,.02)}
   </main>
 </div>
 
-<!-- ── New Person Modal ──────────────────────────────────────────────────── -->
+<!-- New Person -->
 <div class="modal-bg" id="new-modal">
   <div class="modal">
     <h2>New Person</h2>
+    <div class="field"><label>LinkedIn Profile Link</label><input id="linkedin-url" placeholder="https://www.linkedin.com/in/name/"/></div>
     <div class="field">
-      <label>LinkedIn Profile Link</label>
-      <input id="linkedin-url" placeholder="https://www.linkedin.com/in/name/"/>
-    </div>
-    <div class="field">
-      <label>Profile text backup (optional but recommended)</label>
-      <textarea id="profile-text" rows="7" placeholder="If LinkedIn link cannot be read, paste profile text here: headline, about, posts, experience."></textarea>
-      <div class="note">A normal browser HTML file usually cannot scrape LinkedIn directly because LinkedIn blocks cross-origin requests. The AI can infer from pasted text, and can use the URL slug as backup.</div>
+      <label>Profile text backup (recommended)</label>
+      <textarea id="profile-text" rows="7" placeholder="Paste their headline, about, posts, experience, or profile text here."></textarea>
+      <div class="note">LinkedIn blocks direct scraping, so profile text gives better personalization. URL-only still works as backup.</div>
     </div>
     <div class="row" style="justify-content:flex-end">
-      <button class="btn btn-ghost" onclick="closeNewPerson()">Cancel</button>
+      <button class="btn" onclick="closeNewPerson()">Cancel</button>
       <button class="btn btn-gold" id="create-btn" onclick="createFromLinkedIn()">Auto-detect + create</button>
     </div>
   </div>
 </div>
 
-<!-- ── Settings Modal ────────────────────────────────────────────────────── -->
-<div class="modal-bg" id="settings-modal">
-  <div class="modal">
-    <h2>Settings</h2>
-    <div class="field"><label>Company Name</label><input id="set-company"/></div>
-    <div class="field"><label>Calendly Link</label><input id="set-cal" placeholder="https://cal.com/..."/></div>
-    <p class="note">Your Groq API key is configured server-side and never exposed to the browser.</p>
-    <div class="row" style="justify-content:flex-end;margin-top:8px">
-      <button class="btn btn-red" onclick="logout()">Log out</button>
-      <button class="btn btn-ghost" onclick="closeSettings()">Cancel</button>
-      <button class="btn btn-gold" onclick="saveSettings()">Save</button>
+<!-- Business Setup -->
+<div class="modal-bg" id="business-modal">
+  <div class="modal wide">
+    <div class="onboarding-badge" id="onboarding-badge">First-time setup</div>
+    <h2>Business Setup</h2>
+    <p class="note">
+      This is what makes each account work differently. If someone does outreach for accountants, SaaS, agencies, consultants, or clinics, the AI will adapt to that business.
+    </p>
+
+    <div class="grid2">
+      <div class="field"><label>Company name</label><input id="set-company" placeholder="Nexa Lead"/></div>
+      <div class="field"><label>Calendar link</label><input id="set-cal" placeholder="https://cal.com/..."/></div>
+    </div>
+
+    <div class="field">
+      <label>What does your business do?</label>
+      <textarea id="set-business-description" rows="4" placeholder="Example: We help accounting firms book qualified calls with small business owners through LinkedIn outbound."></textarea>
+    </div>
+
+    <div class="grid2">
+      <div class="field">
+        <label>Your offer</label>
+        <textarea id="set-offer" rows="4" placeholder="Example: We generate 10-15 qualified sales conversations per month without the founder doing the outreach."></textarea>
+      </div>
+      <div class="field">
+        <label>Target customer / ICP</label>
+        <textarea id="set-target" rows="4" placeholder="Example: accounting firms, CPA practices, bookkeeping agencies, tax consultants..."></textarea>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>How do you normally do outreach?</label>
+      <textarea id="set-outreach-style" rows="4" placeholder="Describe your process: connection message, first ask, qualifying questions, pitch, booking step."></textarea>
+    </div>
+
+    <div class="grid2">
+      <div class="field">
+        <label>Personalization style</label>
+        <textarea id="set-personalization-style" rows="4" placeholder="Example: 30 words, starts with I like how, focused on how they think, not generic compliments."></textarea>
+      </div>
+      <div class="field">
+        <label>Personalization examples</label>
+        <textarea id="set-personalization-examples" rows="4" placeholder="Paste 2-3 personalization examples you like."></textarea>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Objection handling style</label>
+      <textarea id="set-objection-style" rows="4" placeholder="Example: Charlie Morgan style. Calm, direct, no pressure, no defending, qualify or close depending on buying intent."></textarea>
+    </div>
+
+    <hr>
+
+    <h2 style="font-size:20px;margin-top:0">Outreach Script</h2>
+    <p class="note">Use [Name], [personalization], [service], [calendar_link], and [target_customer] as variables.</p>
+
+    <div class="field"><label>Step 1 message</label><textarea id="set-step1" rows="4"></textarea></div>
+    <div class="field"><label>Step 2 message</label><textarea id="set-step2" rows="4"></textarea></div>
+    <div class="field"><label>Step 3 message</label><textarea id="set-step3" rows="5"></textarea></div>
+    <div class="field"><label>Step 4 booking message</label><textarea id="set-step4" rows="5"></textarea></div>
+
+    <div class="row" style="justify-content:flex-end">
+      <button class="btn" id="business-cancel" onclick="closeBusinessSetup()">Cancel</button>
+      <button class="btn btn-gold" id="business-save" onclick="saveBusinessSetup()">Save Business Setup</button>
     </div>
   </div>
 </div>
 
-<!-- ── Feedback Modal ────────────────────────────────────────────────────── -->
+<!-- Feedback Modal -->
 <div class="modal-bg" id="feedback-modal">
   <div class="modal">
     <h2>Refine Reply</h2>
-    <p class="note">Tell the AI what you don't like about the reply and what you want to change. Be specific!</p>
-    <div class="field">
-      <label>Your feedback</label>
-      <textarea id="feedback-text" rows="4" placeholder="E.g., 'Too long, make it more direct' or 'Add a specific question about their revenue model'"></textarea>
-    </div>
+    <p class="note">Tell the AI what you don’t like and what you want changed.</p>
+    <div class="field"><label>Your feedback</label><textarea id="feedback-text" rows="4" placeholder="Too long, make it more direct..."></textarea></div>
     <div class="row" style="justify-content:flex-end">
-      <button class="btn btn-ghost" onclick="closeFeedbackModal()">Cancel</button>
+      <button class="btn" onclick="closeFeedbackModal()">Cancel</button>
       <button class="btn btn-gold" id="feedback-submit" onclick="submitFeedback()">Refine reply</button>
     </div>
-    <p class="note" style="margin-top:12px">Tip: Use Ctrl+Enter to submit</p>
   </div>
 </div>
 
-<!-- ── Edit Reply Modal ────────────────────────────────────────────────────── -->
+<!-- Edit Modal -->
 <div class="modal-bg" id="edit-modal">
   <div class="modal">
     <h2>Edit Reply</h2>
-    <p class="note">Modify the reply text as needed. Make it concise and natural.</p>
-    <div class="field">
-      <label>Reply text</label>
-      <textarea id="edit-reply-text" rows="6" placeholder="Paste your edited reply here"></textarea>
-    </div>
+    <div class="field"><label>Reply text</label><textarea id="edit-reply-text" rows="7"></textarea></div>
     <div class="row" style="justify-content:flex-end">
-      <button class="btn btn-ghost" onclick="closeEditModal()">Cancel</button>
-      <button class="btn btn-gold" id="edit-submit" onclick="saveEditedReply()">Save changes</button>
+      <button class="btn" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-gold" onclick="saveEditedReply()">Save changes</button>
     </div>
-    <p class="note" style="margin-top:12px">Tip: Use Ctrl+Enter to save</p>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const API_BASE = "http://127.0.0.1:8000/api";
+const API_BASE = "/api";
 
 let token = localStorage.getItem("oa_token") || "";
 let people = [];
 let activeId = null;
-let settings = { companyName: "Outreach Agent", calendly: "https://cal.com/nexa-lead-qng40v/15min" };
+let settings = {
+  companyName: "Outreach Agent",
+  calendly: "",
+  businessDescription: "",
+  offer: "",
+  targetCustomer: "",
+  outreachStyle: "",
+  personalizationStyle: "",
+  personalizationExamples: "",
+  objectionStyle: "",
+  step1Script: "",
+  step2Script: "",
+  step3Script: "",
+  step4Script: "",
+  onboardingComplete: 0
+};
 
-// ── API helper ────────────────────────────────────────────────────────────────
+const DEFAULT_STEP1 = `Hey [Name], [personalization]
+
+Are you taking on more clients at the moment?
+Might have something relevant for you :)`;
+
+const DEFAULT_STEP2 = `Great to hear.
+
+Out of curiosity, where are most of your clients currently coming from?
+Referrals, LinkedIn, partnerships, speaking engagements, or something else?`;
+
+const DEFAULT_STEP3 = `Makes sense.
+
+That's actually why I asked.
+
+We help [target_customer] start more conversations with companies already looking for help with [service].
+
+Would you be open to a quick conversation tomorrow to see if it could make sense?`;
+
+const DEFAULT_STEP4 = `Perfect.
+
+Grab a time that works for you here:
+[calendar_link]
+
+Looking forward to speaking.`;
+
 async function api(method, path, body = null) {
   const headers = { "Content-Type": "application/json" };
   if (token) headers["Authorization"] = "Bearer " + token;
@@ -302,11 +400,122 @@ async function api(method, path, body = null) {
   const r = await fetch(API_BASE + path, opts);
   if (r.status === 401) { logout(); throw new Error("Session expired. Please log in again."); }
   const data = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(data.detail || "API error");
+  if (!r.ok) throw new Error(data.detail || data.error || "API error");
   return data;
 }
 
-// ── Normalise backend snake_case → frontend camelCase ─────────────────────────
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2600);
+}
+function initials(n) { return (n || "?").split(/\s+/).filter(Boolean).map(x => x[0]).join("").slice(0, 2).toUpperCase() || "?"; }
+function esc(s) { return (s || "").replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+function today() { return new Date().toLocaleDateString("en-GB", { day:"2-digit", month:"short" }); }
+function getActive() { return people.find(p => p.id === activeId); }
+function showPage(id) { document.querySelectorAll(".page").forEach(p => p.classList.remove("active")); document.getElementById(id).classList.add("active"); }
+function updateBrand() {
+  const name = settings.companyName || "Outreach Agent";
+  document.getElementById("brand-name").textContent = name;
+  document.getElementById("home-company").textContent = name;
+}
+
+function switchAuthTab(tab) {
+  document.getElementById("login-form").style.display = tab === "login" ? "" : "none";
+  document.getElementById("register-form").style.display = tab === "register" ? "" : "none";
+  document.getElementById("tab-login").className = "auth-tab" + (tab === "login" ? " active" : "");
+  document.getElementById("tab-register").className = "auth-tab" + (tab === "register" ? " active" : "");
+  document.getElementById("auth-err").textContent = "";
+  document.getElementById("reg-err").textContent = "";
+}
+
+async function doLogin() {
+  const email = document.getElementById("auth-email").value.trim();
+  const password = document.getElementById("auth-password").value;
+  const err = document.getElementById("auth-err");
+  if (!email || !password) { err.textContent = "Fill in both fields."; return; }
+  const btn = document.getElementById("auth-submit-btn");
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Signing in...';
+  try {
+    const data = await api("POST", "/auth/login", { email, password });
+    token = data.access_token;
+    localStorage.setItem("oa_token", token);
+    await bootApp();
+  } catch(e) { err.textContent = e.message; }
+  finally { btn.disabled = false; btn.textContent = "Sign In"; }
+}
+
+async function doRegister() {
+  const company_name = document.getElementById("reg-company").value.trim();
+  const email = document.getElementById("reg-email").value.trim();
+  const password = document.getElementById("reg-password").value;
+  const err = document.getElementById("reg-err");
+  if (!company_name || !email || !password) { err.textContent = "Fill in all fields."; return; }
+  const btn = document.getElementById("reg-submit-btn");
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Creating account...';
+  try {
+    const data = await api("POST", "/auth/register", { email, password, company_name });
+    token = data.access_token;
+    localStorage.setItem("oa_token", token);
+    await bootApp(true);
+  } catch(e) { err.textContent = e.message; }
+  finally { btn.disabled = false; btn.textContent = "Create Account"; }
+}
+
+function logout() {
+  token = "";
+  localStorage.removeItem("oa_token");
+  people = [];
+  activeId = null;
+  document.getElementById("main-app").style.display = "none";
+  document.getElementById("auth-screen").classList.add("open");
+  closeBusinessSetup();
+  closeNewPerson();
+}
+
+function applySettingsFromUser(u) {
+  settings = {
+    companyName: u.company_name || "Outreach Agent",
+    calendly: u.calendly || "",
+    businessDescription: u.business_description || "",
+    offer: u.offer || "",
+    targetCustomer: u.target_customer || "",
+    outreachStyle: u.outreach_style || "",
+    personalizationStyle: u.personalization_style || "",
+    personalizationExamples: u.personalization_examples || "",
+    objectionStyle: u.objection_style || "",
+    step1Script: u.step1_script || "",
+    step2Script: u.step2_script || "",
+    step3Script: u.step3_script || "",
+    step4Script: u.step4_script || "",
+    onboardingComplete: u.onboarding_complete || 0
+  };
+  updateBrand();
+}
+
+async function bootApp(forceOnboarding = false) {
+  document.getElementById("auth-screen").classList.remove("open");
+  document.getElementById("main-app").style.display = "grid";
+  try {
+    const me = await api("GET", "/auth/me");
+    applySettingsFromUser(me);
+    await loadPeople();
+    showHome();
+    if (forceOnboarding || !settings.onboardingComplete || !settings.businessDescription || !settings.offer || !settings.targetCustomer) {
+      setTimeout(() => openBusinessSetup(true), 250);
+    }
+  } catch(e) {
+    toast("Failed to load: " + e.message);
+  }
+}
+
+async function loadPeople() {
+  const raw = await api("GET", "/people");
+  people = raw.map(normPerson);
+  renderAll();
+}
+
 function normPerson(p) {
   return {
     id: p.id,
@@ -324,164 +533,80 @@ function normPerson(p) {
     nextAction: p.next_action || "",
     created: p.created || "",
     lastActivity: p.last_activity || "Today",
-    messages: (p.messages || []).map(m => ({
-      id: m.id,
-      from: m.from_role,
-      label: m.label || "",
-      text: m.text,
-      ts: m.ts,
-    })),
+    messages: (p.messages || []).map(m => ({ id:m.id, from:m.from_role, label:m.label || "", text:m.text, ts:m.ts }))
   };
 }
 
-// ── Utility ───────────────────────────────────────────────────────────────────
-function toast(msg) {
-  const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 2600);
-}
-function initials(n) { return (n || "?").split(/\s+/).filter(Boolean).map(x => x[0]).join("").slice(0, 2).toUpperCase() || "?"; }
-function esc(s) { return (s || "").replace(/[&<>]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;"}[c])); }
-function today() { return new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short" }); }
-function getActive() { return people.find(p => p.id === activeId); }
-function showPage(id) { document.querySelectorAll(".page").forEach(p => p.classList.remove("active")); document.getElementById(id).classList.add("active"); }
-function updateBrand() {
-  const name = settings.companyName || "Outreach Agent";
-  document.getElementById("brand-name").textContent = name;
-  const h = document.getElementById("home-company");
-  if (h) h.textContent = name;
-}
-
-// ── Auth ──────────────────────────────────────────────────────────────────────
-function switchAuthTab(tab) {
-  document.getElementById("login-form").style.display = tab === "login" ? "" : "none";
-  document.getElementById("register-form").style.display = tab === "register" ? "" : "none";
-  document.getElementById("tab-login").className = "auth-tab" + (tab === "login" ? " active" : "");
-  document.getElementById("tab-register").className = "auth-tab" + (tab === "register" ? " active" : "");
-  document.getElementById("auth-err").textContent = "";
-  document.getElementById("reg-err").textContent = "";
-}
-
-async function doLogin() {
-  const email = document.getElementById("auth-email").value.trim();
-  const pass = document.getElementById("auth-password").value;
-  const errEl = document.getElementById("auth-err");
-  if (!email || !pass) { errEl.textContent = "Fill in both fields."; return; }
-  const btn = document.getElementById("auth-submit-btn");
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Signing in...';
-  try {
-    const data = await api("POST", "/auth/login", { email, password: pass });
-    token = data.access_token;
-    localStorage.setItem("oa_token", token);
-    await bootApp();
-  } catch(e) {
-    errEl.textContent = e.message;
-  } finally {
-    btn.disabled = false; btn.textContent = "Sign In";
-  }
-}
-
-async function doRegister() {
-  const company = document.getElementById("reg-company").value.trim();
-  const email = document.getElementById("reg-email").value.trim();
-  const pass = document.getElementById("reg-password").value;
-  const errEl = document.getElementById("reg-err");
-  if (!company || !email || !pass) { errEl.textContent = "Fill in all fields."; return; }
-  const btn = document.getElementById("reg-submit-btn");
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Creating account...';
-  try {
-    const data = await api("POST", "/auth/register", { email, password: pass, company_name: company });
-    token = data.access_token;
-    localStorage.setItem("oa_token", token);
-    await bootApp();
-  } catch(e) {
-    errEl.textContent = e.message;
-  } finally {
-    btn.disabled = false; btn.textContent = "Create Account";
-  }
-}
-
-function logout() {
-  token = "";
-  localStorage.removeItem("oa_token");
-  people = [];
-  activeId = null;
-  document.getElementById("main-app").style.display = "none";
-  document.getElementById("auth-screen").classList.add("open");
-  switchAuthTab("login");
-  closeSettings();
-}
-
-// ── App Bootstrap ─────────────────────────────────────────────────────────────
-async function bootApp() {
-  document.getElementById("auth-screen").classList.remove("open");
-  document.getElementById("main-app").style.display = "grid";
-  try {
-    const me = await api("GET", "/auth/me");
-    settings.companyName = me.company_name || "Outreach Agent";
-    settings.calendly = me.calendly || "https://cal.com/nexa-lead-qng40v/15min";
-    updateBrand();
-    await loadPeople();
-    showHome();
-  } catch(e) {
-    toast("Failed to load: " + e.message);
-  }
-}
-
-async function loadPeople() {
-  try {
-    const raw = await api("GET", "/people");
-    people = raw.map(normPerson);
-    renderAll();
-  } catch(e) {
-    toast("Could not load people: " + e.message);
-  }
-}
-
-// ── Settings ──────────────────────────────────────────────────────────────────
-function openSettings() {
+function openBusinessSetup(firstTime = false) {
+  document.getElementById("onboarding-badge").textContent = firstTime ? "First-time setup" : "Business settings";
+  document.getElementById("business-cancel").style.display = firstTime ? "none" : "";
   document.getElementById("set-company").value = settings.companyName || "";
   document.getElementById("set-cal").value = settings.calendly || "";
-  document.getElementById("settings-modal").classList.add("open");
+  document.getElementById("set-business-description").value = settings.businessDescription || "";
+  document.getElementById("set-offer").value = settings.offer || "";
+  document.getElementById("set-target").value = settings.targetCustomer || "";
+  document.getElementById("set-outreach-style").value = settings.outreachStyle || "";
+  document.getElementById("set-personalization-style").value = settings.personalizationStyle || "30 words, starts with I like how, specific to how they think, not generic compliments.";
+  document.getElementById("set-personalization-examples").value = settings.personalizationExamples || "";
+  document.getElementById("set-objection-style").value = settings.objectionStyle || "Calm, direct, business-owner tone. Never pushy. Qualify if curious, end if dead, close if ready.";
+  document.getElementById("set-step1").value = settings.step1Script || DEFAULT_STEP1;
+  document.getElementById("set-step2").value = settings.step2Script || DEFAULT_STEP2;
+  document.getElementById("set-step3").value = settings.step3Script || DEFAULT_STEP3;
+  document.getElementById("set-step4").value = settings.step4Script || DEFAULT_STEP4;
+  document.getElementById("business-modal").classList.add("open");
 }
-function closeSettings() { document.getElementById("settings-modal").classList.remove("open"); }
-async function saveSettings() {
-  const company = document.getElementById("set-company").value.trim() || "Outreach Agent";
-  const cal = document.getElementById("set-cal").value.trim() || settings.calendly;
+
+function closeBusinessSetup() {
+  document.getElementById("business-modal").classList.remove("open");
+}
+
+async function saveBusinessSetup() {
+  const btn = document.getElementById("business-save");
+  const body = {
+    company_name: document.getElementById("set-company").value.trim() || "Outreach Agent",
+    calendly: document.getElementById("set-cal").value.trim(),
+    business_description: document.getElementById("set-business-description").value.trim(),
+    offer: document.getElementById("set-offer").value.trim(),
+    target_customer: document.getElementById("set-target").value.trim(),
+    outreach_style: document.getElementById("set-outreach-style").value.trim(),
+    personalization_style: document.getElementById("set-personalization-style").value.trim(),
+    personalization_examples: document.getElementById("set-personalization-examples").value.trim(),
+    objection_style: document.getElementById("set-objection-style").value.trim(),
+    step1_script: document.getElementById("set-step1").value.trim(),
+    step2_script: document.getElementById("set-step2").value.trim(),
+    step3_script: document.getElementById("set-step3").value.trim(),
+    step4_script: document.getElementById("set-step4").value.trim(),
+    onboarding_complete: 1
+  };
+  if (!body.business_description || !body.offer || !body.target_customer) {
+    toast("Please fill business description, offer, and target customer.");
+    return;
+  }
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Saving...';
   try {
-    await api("PUT", "/settings", { company_name: company, calendly: cal });
-    settings.companyName = company;
-    settings.calendly = cal;
-    updateBrand();
-    closeSettings();
-    toast("Settings saved");
+    const updated = await api("PUT", "/settings", body);
+    applySettingsFromUser(updated);
+    closeBusinessSetup();
+    toast("Business setup saved");
   } catch(e) {
     toast("Error: " + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = "Save Business Setup";
   }
 }
 
-// ── New Person ────────────────────────────────────────────────────────────────
 function openNewPerson() { document.getElementById("new-modal").classList.add("open"); }
-function closeNewPerson() {
-  document.getElementById("new-modal").classList.remove("open");
-  document.getElementById("linkedin-url").value = "";
-  document.getElementById("profile-text").value = "";
-}
+function closeNewPerson() { document.getElementById("new-modal").classList.remove("open"); document.getElementById("linkedin-url").value = ""; document.getElementById("profile-text").value = ""; }
 
 async function createFromLinkedIn() {
   const url = document.getElementById("linkedin-url").value.trim();
   const profile = document.getElementById("profile-text").value.trim();
   if (!url) { toast("Paste LinkedIn link first"); return; }
   const btn = document.getElementById("create-btn");
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Creating...';
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Creating...';
   try {
     toast("Analysing profile...");
-    // Step 1: AI extraction
     const ai = await api("POST", "/ai/create-person", { linkedin_url: url, profile_text: profile });
-
-    // Step 2: Save to DB
     const saved = await api("POST", "/people", {
       name: ai.name,
       role: ai.role,
@@ -495,9 +620,8 @@ async function createFromLinkedIn() {
       step: 1,
       created: today(),
       last_activity: "Today",
-      first_message: ai.step1_message,
+      first_message: ai.step1_message
     });
-
     const person = normPerson(saved);
     people.unshift(person);
     closeNewPerson();
@@ -506,19 +630,15 @@ async function createFromLinkedIn() {
   } catch(e) {
     toast("Error: " + e.message);
   } finally {
-    btn.disabled = false;
-    btn.textContent = "Auto-detect + create";
+    btn.disabled = false; btn.textContent = "Auto-detect + create";
   }
 }
 
-// ── Render ────────────────────────────────────────────────────────────────────
 function renderAll() { renderSidebar(); renderPeopleTable(); updateStats(); updateBrand(); if (activeId) renderConversation(); }
-
 function filterPeople() {
   const q = document.getElementById("global-search")?.value.toLowerCase().trim() || "";
   return people.filter(p => p.status !== "archived" && (!q || (p.name || "").toLowerCase().includes(q)));
 }
-
 function renderSidebar() {
   const list = document.getElementById("people-list");
   const arr = filterPeople();
@@ -526,17 +646,10 @@ function renderSidebar() {
   list.innerHTML = arr.map(p => `<div class="person ${p.id === activeId ? 'active' : ''}" onclick="openPerson(${p.id})">
     <div class="avatar">${initials(p.name)}</div><div style="min-width:0">
       <div class="p-name">${esc(p.name)}</div>
-      <div class="p-meta">Score ${esc((p.prospectScore || 5) + "/10")} · Step ${Math.min(p.step, 4)}/4 · ${esc(p.status)} · ${esc(p.lastActivity || "")}</div>
+      <div class="p-meta">Score ${esc((p.prospectScore || 5) + "/10")} · Step ${Math.min(p.step,4)}/4 · ${esc(p.status)} · ${esc(p.lastActivity || "")}</div>
     </div></div>`).join("");
 }
-
-function scoreClass(score) {
-  score = parseInt(score) || 0;
-  if (score >= 8) return "score-good";
-  if (score >= 5) return "score-mid";
-  return "score-low";
-}
-
+function scoreClass(score) { score = parseInt(score) || 0; if (score >= 8) return "score-good"; if (score >= 5) return "score-mid"; return "score-low"; }
 function renderPeopleTable() {
   const body = document.getElementById("people-table");
   const arr = filterPeople();
@@ -546,37 +659,31 @@ function renderPeopleTable() {
     <td>${esc(p.role || "—")}</td>
     <td>${esc(p.service || "—")}</td>
     <td><span class="pill">${esc(p.status)}</span></td>
-    <td>Step ${Math.min(p.step, 4)}/4</td>
+    <td>Step ${Math.min(p.step,4)}/4</td>
     <td>${esc(p.lastActivity || "—")}</td>
     <td>
-      <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openPerson(${p.id})">Open</button>
+      <button class="btn btn-sm" onclick="event.stopPropagation();openPerson(${p.id})">Open</button>
       <button class="btn btn-red btn-sm" onclick="event.stopPropagation();deletePerson(${p.id})">Delete</button>
     </td>
   </tr>`).join("") || `<tr><td colspan="8" class="note">No matching people.</td></tr>`;
 }
-
 function updateStats() {
   const active = people.filter(p => p.status !== "archived");
   document.getElementById("stat-people").textContent = active.length;
   document.getElementById("stat-replies").textContent = active.filter(p => p.status === "replied").length;
   document.getElementById("stat-booked").textContent = active.filter(p => p.status === "booked").length;
 }
-
 function showHome() { activeId = null; document.getElementById("top-title").textContent = "Home"; showPage("page-welcome"); renderAll(); }
 function showPeople() { activeId = null; document.getElementById("top-title").textContent = "People View"; showPage("page-people"); renderAll(); }
 
 async function openPerson(id) {
   activeId = id;
-  let local = people.find(p => p.id === id);
-  // Refresh from server to get latest messages
   try {
     const fresh = await api("GET", `/people/${id}`);
     const norm = normPerson(fresh);
     const idx = people.findIndex(p => p.id === id);
-    if (idx !== -1) people[idx] = norm;
-    else people.unshift(norm);
-    activeId = id;
-  } catch(e) { /* use local cache */ }
+    if (idx !== -1) people[idx] = norm; else people.unshift(norm);
+  } catch(e) {}
   document.getElementById("top-title").textContent = getActive()?.name || "";
   showPage("page-conv");
   renderAll();
@@ -587,298 +694,150 @@ function renderConversation() {
   document.getElementById("c-avatar").textContent = initials(p.name);
   document.getElementById("c-name").textContent = p.name;
   document.getElementById("c-role").textContent = [p.role, p.service, "Score " + (p.prospectScore || 5) + "/10"].filter(Boolean).join(" · ") || "—";
-  for (let i = 1; i <= 4; i++) {
-    const el = document.getElementById("step-" + i); el.className = "step";
-    if (i < p.step) el.classList.add("done"); else if (i === Math.min(p.step, 4)) el.classList.add("now");
+  for (let i=1;i<=4;i++) {
+    const el = document.getElementById("step-"+i); el.className = "step";
+    if (i < p.step) el.classList.add("done"); else if (i === Math.min(p.step,4)) el.classList.add("now");
   }
   const chat = document.getElementById("chat");
   chat.innerHTML = p.messages.map((m, idx) => {
     const cls = m.from === "you" ? "you" : m.from === "them" ? "them" : "ai";
     const isAI = m.from === "ai";
     const label = m.label || (m.from === "you" ? "You" : m.from === "them" ? p.name : "AI");
-    const copyLink = m.from === "you" ? ` · <span class="copy" onclick="copyMsg(${idx})">copy</span>` : "";
-    const editBtn = isAI ? ` · <span class="copy" style="color:var(--blue);cursor:pointer" onclick="openEditModal(${idx})" title="Edit this reply">✎ Edit</span>` : "";
-    const approveBtn = isAI ? ` · <span class="copy" style="color:var(--green);cursor:pointer" onclick="approveReply(${idx})" title="Approve this reply">✓ Approve</span>` : "";
-    const refineBtn = isAI ? ` · <span class="copy" style="color:var(--red);cursor:pointer" onclick="openFeedbackModal(${idx})" title="Give feedback to refine">✕ Refine</span>` : "";
+    const copyLink = ` · <span class="copy" onclick="copyMsg(${idx})">copy</span>`;
+    const aiActions = isAI ? ` · <span class="copy" style="color:var(--blue)" onclick="openEditModal(${idx})">edit</span> · <span class="copy" style="color:var(--green)" onclick="approveReply(${idx})">approve</span> · <span class="copy" style="color:var(--red)" onclick="openFeedbackModal(${idx})">refine</span>` : "";
     return `<div class="msg ${cls}">
-      <div class="meta">${esc(label)}${copyLink}${editBtn}${approveBtn}${refineBtn}</div>
+      <div class="meta">${esc(label)}${copyLink}${aiActions}</div>
       <div class="bubble">${esc(m.text)}</div>
     </div>`;
   }).join("");
   setTimeout(() => { chat.scrollTop = chat.scrollHeight; }, 0);
 }
+function scrollChatBottom(){ const c=document.getElementById("chat"); if(c) c.scrollTop = c.scrollHeight; }
+function copyMsg(idx){ const p=getActive(); if(!p)return; navigator.clipboard.writeText(p.messages[idx].text); toast("Copied"); }
 
-function scrollChatBottom() { const c = document.getElementById("chat"); if (c) c.scrollTop = c.scrollHeight; }
-
-function copyMsg(idx) {
-  const p = getActive(); if (!p) return;
-  navigator.clipboard.writeText(p.messages[idx].text); toast("Copied");
+function applyTemplate(t, p) {
+  return (t || "")
+    .replaceAll("[Name]", p.name.split(" ")[0])
+    .replaceAll("[personalization]", p.personalization || "")
+    .replaceAll("[service]", p.service || "their services")
+    .replaceAll("[target_customer]", settings.targetCustomer || "businesses")
+    .replaceAll("[calendar_link]", settings.calendly || "");
 }
-
-// ── Generate Step ─────────────────────────────────────────────────────────────
 async function generateCurrentStep() {
   const p = getActive(); if (!p) return;
-  let msg = "";
-  if (p.step === 1) {
-    msg = p.messages[0]?.text || "";
-  } else if (p.step === 2) {
-    msg = `Great to hear.\n\nOut of curiosity, where are most of your clients currently coming from?\nReferrals, LinkedIn, partnerships, speaking engagements, or something else?`;
-  } else if (p.step === 3) {
-    msg = `Makes sense.\n\nThat's actually why I asked.\n\nWe've been helping B2B consultants start more conversations with companies already looking for help with ${p.service || "their services"} through LinkedIn.\n\nWould you be open to a quick conversation tomorrow to see if it could make sense for your business?`;
-  } else if (p.step === 4) {
-    msg = `Perfect.\n\nGrab a time that works for you here:\n${settings.calendly}\n\nOur founder, Anish Wagle, will be the one taking the call and learning more about your business.\n\nLooking forward to speaking.`;
-  } else {
-    toast("Sequence complete"); return;
-  }
-
+  let template = "";
+  if (p.step === 1) template = settings.step1Script || DEFAULT_STEP1;
+  else if (p.step === 2) template = settings.step2Script || DEFAULT_STEP2;
+  else if (p.step === 3) template = settings.step3Script || DEFAULT_STEP3;
+  else if (p.step === 4) template = settings.step4Script || DEFAULT_STEP4;
+  else { toast("Sequence complete"); return; }
+  const msg = applyTemplate(template, p);
   try {
-    const saved = await api("POST", `/people/${p.id}/messages`, {
-      from_role: "you",
-      label: `Step ${Math.min(p.step, 4)} · Generated`,
-      text: msg,
-      ts: Date.now(),
-    });
-    p.messages.push({ id: saved.id, from: "you", label: saved.label, text: saved.text, ts: saved.ts });
-    await api("PATCH", `/people/${p.id}`, { last_activity: "Today" });
+    const saved = await api("POST", `/people/${p.id}/messages`, { from_role:"you", label:`Step ${Math.min(p.step,4)} · Generated`, text:msg, ts:Date.now() });
+    p.messages.push({ id:saved.id, from:"you", label:saved.label, text:saved.text, ts:saved.ts });
+    await api("PATCH", `/people/${p.id}`, { last_activity:"Today" });
     p.lastActivity = "Today";
-    renderAll();
-    toast("Message generated");
-  } catch(e) { toast("Error: " + e.message); }
+    renderAll(); toast("Message generated");
+  } catch(e){ toast("Error: " + e.message); }
 }
-
-// ── Mark Sent / Booked ────────────────────────────────────────────────────────
 async function markSent() {
-  const p = getActive(); if (!p) return;
+  const p=getActive(); if(!p)return;
   const newStep = p.step < 4 ? p.step + 1 : 4;
   try {
-    await api("PATCH", `/people/${p.id}`, { step: newStep, status: "active", last_activity: "Today" });
-    p.step = newStep; p.status = "active"; p.lastActivity = "Today";
-    renderAll(); toast("Advanced");
-  } catch(e) { toast("Error: " + e.message); }
+    await api("PATCH", `/people/${p.id}`, { step:newStep, status:"active", last_activity:"Today" });
+    p.step = newStep; p.status="active"; p.lastActivity="Today"; renderAll(); toast("Advanced");
+  } catch(e){ toast("Error: " + e.message); }
 }
-
 async function markBooked() {
-  const p = getActive(); if (!p) return;
+  const p=getActive(); if(!p)return;
   try {
-    await api("PATCH", `/people/${p.id}`, { status: "booked", step: 4, last_activity: "Today" });
-    p.status = "booked"; p.step = 4; p.lastActivity = "Today";
-    renderAll(); toast("Marked booked");
-  } catch(e) { toast("Error: " + e.message); }
+    await api("PATCH", `/people/${p.id}`, { status:"booked", step:4, last_activity:"Today" });
+    p.status="booked"; p.step=4; p.lastActivity="Today"; renderAll(); toast("Marked booked");
+  } catch(e){ toast("Error: " + e.message); }
 }
-
-// ── Delete / Archive ──────────────────────────────────────────────────────────
 async function deletePerson(id) {
-  const p = people.find(x => x.id === id); if (!p) return;
-  if (!confirm("Delete " + p.name + " permanently? This cannot be undone.")) return;
+  const p = people.find(x=>x.id===id); if(!p)return;
+  if(!confirm("Delete " + p.name + " permanently?")) return;
   try {
     await api("DELETE", `/people/${id}`);
-    people = people.filter(x => x.id !== id);
-    if (activeId === id) activeId = null;
+    people = people.filter(x=>x.id!==id);
+    if(activeId===id) activeId=null;
     showPeople(); toast("Person deleted");
-  } catch(e) { toast("Error: " + e.message); }
+  } catch(e){ toast("Error: " + e.message); }
 }
-function deleteCurrentPerson() { const p = getActive(); if (p) deletePerson(p.id); }
+function deleteCurrentPerson(){ const p=getActive(); if(p) deletePerson(p.id); }
 
-async function archivePerson() {
-  const p = getActive(); if (!p) return;
-  try {
-    await api("PATCH", `/people/${p.id}`, { status: "archived", last_activity: "Today" });
-    p.status = "archived";
-    activeId = null; showPeople(); toast("Archived");
-  } catch(e) { toast("Error: " + e.message); }
-}
-
-// ── Handle Objection ──────────────────────────────────────────────────────────
 async function handleObjection() {
-  const p = getActive(); if (!p) { toast("Open a person first"); return; }
-  const box = document.getElementById("their-reply");
-  const btn = document.getElementById("handle-btn");
-  const reply = box.value.trim();
-  if (!reply) { toast("Paste their reply first"); return; }
-
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Thinking...';
-
+  const p=getActive(); if(!p){ toast("Open a person first"); return; }
+  const box=document.getElementById("their-reply");
+  const btn=document.getElementById("handle-btn");
+  const reply=box.value.trim();
+  if(!reply){ toast("Paste their reply first"); return; }
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Thinking...';
   try {
-    // 1. Save their reply message
-    const theirMsg = await api("POST", `/people/${p.id}/messages`, {
-      from_role: "them",
-      label: p.name,
-      text: reply,
-      ts: Date.now(),
-    });
-    p.messages.push({ id: theirMsg.id, from: "them", label: p.name, text: reply, ts: theirMsg.ts });
-    await api("PATCH", `/people/${p.id}`, { status: "replied", last_activity: "Today" });
-    p.status = "replied"; p.lastActivity = "Today";
-    box.value = "";
-    renderAll();
-    toast("Writing reply...");
-
-    // 2. Call AI handler
-    const result = await api("POST", "/ai/handle-reply", { person_id: p.id, reply_text: reply });
-
-    // 3. Save AI analysis message
-    const aiMsg = await api("POST", `/people/${p.id}/messages`, {
-      from_role: "ai",
-      label: "Suggested reply",
-      text: result.short_output,
-      ts: Date.now(),
-    });
-    p.messages.push({ id: aiMsg.id, from: "ai", label: "Suggested reply", text: result.short_output, ts: aiMsg.ts });
-
-    // 4. Update person score/status
+    const theirMsg = await api("POST", `/people/${p.id}/messages`, { from_role:"them", label:p.name, text:reply, ts:Date.now() });
+    p.messages.push({ id:theirMsg.id, from:"them", label:p.name, text:reply, ts:theirMsg.ts });
+    await api("PATCH", `/people/${p.id}`, { status:"replied", last_activity:"Today" });
+    p.status="replied"; p.lastActivity="Today"; box.value=""; renderAll();
+    const result = await api("POST", "/ai/handle-reply", { person_id:p.id, reply_text:reply });
+    const aiMsg = await api("POST", `/people/${p.id}/messages`, { from_role:"ai", label:"Suggested reply", text:result.short_output, ts:Date.now() });
+    p.messages.push({ id:aiMsg.id, from:"ai", label:"Suggested reply", text:result.short_output, ts:aiMsg.ts });
     let newStatus = "replied";
     if (result.next_action === "close" || /cal\.com|grab a time|book a time|calendly/i.test(result.reply)) newStatus = "closing";
     else if (result.next_action === "end_conversation" || result.intent === "bad_fit") newStatus = "weak";
-
     await api("PATCH", `/people/${p.id}`, {
-      prospect_score: result.score,
-      score_reason: result.what_they_mean,
-      intent: result.intent,
-      next_action: result.next_action,
-      status: newStatus,
-      last_activity: "Today",
+      prospect_score: result.score, score_reason: result.what_they_mean, intent: result.intent,
+      next_action: result.next_action, status: newStatus, last_activity:"Today"
     });
-    p.prospectScore = result.score;
-    p.scoreReason = result.what_they_mean;
-    p.intent = result.intent;
-    p.nextAction = result.next_action;
-    p.status = newStatus;
-    p.lastActivity = "Today";
-
+    p.prospectScore=result.score; p.scoreReason=result.what_they_mean; p.intent=result.intent; p.nextAction=result.next_action; p.status=newStatus;
     renderAll(); toast("Reply ready");
-  } catch(e) {
-    toast("Error: " + e.message);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Handle reply";
-  }
+  } catch(e){ toast("Error: " + e.message); }
+  finally { btn.disabled=false; btn.textContent="Handle reply"; }
 }
 
-// ── Approve / Refine Reply ────────────────────────────────────────────────────
 async function approveReply(msgIdx) {
-  const p = getActive(); if (!p) return;
-  const msg = p.messages[msgIdx];
-  if (msg.from !== "ai") return;
-  
+  const p=getActive(); if(!p)return;
+  const msg=p.messages[msgIdx]; if(!msg || msg.from!=="ai")return;
+  const replyOnly = extractRecommendedReply(msg.text);
   try {
-    // Add the approved reply to the conversation as a "you" message
-    const saved = await api("POST", `/people/${p.id}/messages`, {
-      from_role: "you",
-      label: "You",
-      text: msg.text,
-      ts: Date.now(),
-    });
-    p.messages.push({ id: saved.id, from: "you", label: "You", text: saved.text, ts: saved.ts });
-    await api("PATCH", `/people/${p.id}`, { last_activity: "Today" });
-    p.lastActivity = "Today";
-    renderAll();
-    toast("Reply approved & sent");
-  } catch(e) {
-    toast("Error: " + e.message);
-  }
+    const saved = await api("POST", `/people/${p.id}/messages`, { from_role:"you", label:"You", text:replyOnly, ts:Date.now() });
+    p.messages.push({ id:saved.id, from:"you", label:"You", text:saved.text, ts:saved.ts });
+    renderAll(); toast("Reply approved");
+  } catch(e){ toast("Error: " + e.message); }
 }
-
-function openFeedbackModal(msgIdx) {
-  const p = getActive(); if (!p) return;
-  const msg = p.messages[msgIdx];
-  if (msg.from !== "ai") return;
-  
-  window.feedbackMsgIdx = msgIdx;
-  document.getElementById("feedback-modal").classList.add("open");
-  document.getElementById("feedback-text").value = "";
-  document.getElementById("feedback-text").focus();
+function extractRecommendedReply(text){
+  const marker = text.indexOf("Recommended reply:");
+  return marker >= 0 ? text.slice(marker + "Recommended reply:".length).trim() : text;
 }
-
-function closeFeedbackModal() {
-  document.getElementById("feedback-modal").classList.remove("open");
-  window.feedbackMsgIdx = null;
-}
-
+function openFeedbackModal(msgIdx){ window.feedbackMsgIdx=msgIdx; document.getElementById("feedback-text").value=""; document.getElementById("feedback-modal").classList.add("open"); }
+function closeFeedbackModal(){ document.getElementById("feedback-modal").classList.remove("open"); window.feedbackMsgIdx=null; }
 async function submitFeedback() {
-  const p = getActive(); if (!p) return;
-  const feedback = document.getElementById("feedback-text").value.trim();
-  if (!feedback) { toast("Please describe what you want to change"); return; }
-  
-  const btn = document.getElementById("feedback-submit");
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Refining...';
-  
+  const p=getActive(); if(!p)return;
+  const feedback=document.getElementById("feedback-text").value.trim();
+  if(!feedback){ toast("Add feedback first"); return; }
+  const btn=document.getElementById("feedback-submit");
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Refining...';
   try {
-    toast("Generating new reply...");
-    const result = await api("POST", "/ai/refine-reply", { person_id: p.id, feedback: feedback });
-    
-    // Update the AI message with the new reply
-    const msgIdx = window.feedbackMsgIdx;
-    p.messages[msgIdx].text = result.short_output;
-    
-    closeFeedbackModal();
-    renderAll();
-    toast("Reply refined");
-  } catch(e) {
-    toast("Error: " + e.message);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Refine reply";
-  }
+    const result=await api("POST", "/ai/refine-reply", { person_id:p.id, feedback });
+    const idx=window.feedbackMsgIdx;
+    if(p.messages[idx]) p.messages[idx].text=result.short_output;
+    closeFeedbackModal(); renderAll(); toast("Reply refined");
+  } catch(e){ toast("Error: " + e.message); }
+  finally { btn.disabled=false; btn.textContent="Refine reply"; }
 }
+function openEditModal(msgIdx){ window.editMsgIdx=msgIdx; const p=getActive(); if(!p)return; document.getElementById("edit-reply-text").value=p.messages[msgIdx].text; document.getElementById("edit-modal").classList.add("open"); }
+function closeEditModal(){ document.getElementById("edit-modal").classList.remove("open"); window.editMsgIdx=null; }
+function saveEditedReply(){ const p=getActive(); if(!p)return; const t=document.getElementById("edit-reply-text").value.trim(); if(!t)return; p.messages[window.editMsgIdx].text=t; closeEditModal(); renderAll(); toast("Edited"); }
 
-// Handle Enter key in feedback box
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && e.ctrlKey && document.getElementById("feedback-modal").classList.contains("open")) {
-    submitFeedback();
-  }
-  if (e.key === "Enter" && e.ctrlKey && document.getElementById("edit-modal").classList.contains("open")) {
-    saveEditedReply();
-  }
+  if(e.key==="Enter" && e.ctrlKey && document.getElementById("feedback-modal").classList.contains("open")) submitFeedback();
+  if(e.key==="Enter" && e.ctrlKey && document.getElementById("edit-modal").classList.contains("open")) saveEditedReply();
 });
 
-// ── Edit Reply ────────────────────────────────────────────────────────────────
-function openEditModal(msgIdx) {
-  const p = getActive(); if (!p) return;
-  const msg = p.messages[msgIdx];
-  if (msg.from !== "ai") return;
-  
-  window.editMsgIdx = msgIdx;
-  const editArea = document.getElementById("edit-reply-text");
-  editArea.value = msg.text;
-  document.getElementById("edit-modal").classList.add("open");
-  editArea.focus();
-  editArea.select();
-}
-
-function closeEditModal() {
-  document.getElementById("edit-modal").classList.remove("open");
-  window.editMsgIdx = null;
-}
-
-function saveEditedReply() {
-  const p = getActive(); if (!p) return;
-  const msgIdx = window.editMsgIdx;
-  const newText = document.getElementById("edit-reply-text").value.trim();
-  
-  if (!newText) { toast("Reply text cannot be empty"); return; }
-  
-  // Update the message
-  p.messages[msgIdx].text = newText;
-  closeEditModal();
-  renderAll();
-  toast("Reply edited");
-}
-
-// ── Init ──────────────────────────────────────────────────────────────────────
 window.addEventListener("DOMContentLoaded", async () => {
-  if (token) {
-    try {
-      // Quick token verify
-      await api("GET", "/auth/me");
-      await bootApp();
-    } catch(e) {
-      // Token invalid, show auth
-      token = "";
-      localStorage.removeItem("oa_token");
-      document.getElementById("auth-screen").classList.add("open");
-    }
+  if(token){
+    try { await api("GET", "/auth/me"); await bootApp(); }
+    catch(e){ token=""; localStorage.removeItem("oa_token"); document.getElementById("auth-screen").classList.add("open"); }
   } else {
     document.getElementById("auth-screen").classList.add("open");
   }
